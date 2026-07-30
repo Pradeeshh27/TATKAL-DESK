@@ -8,16 +8,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-void:#FCF9F2 ;
-    --bg-panel:#e9e0b7;
-    --bg-panel-2:#eb9f53 ;
+    --bg-void:#0A1420;
+    --bg-panel:#101F30;
+    --bg-panel-2:#0D1A28;
     --amber:#FFAA00;
     --amber-dim:#7A5800;
     --green:#35C56A;
     --red:#FF5A5A;
-    --text:#f8f7f6;
-    --muted:#0f0f0f;
-    --rule:#050505;
+    --text:#ECEFF4;
+    --muted:#6E85A0;
+    --rule:#1E3350;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg-void);color:var(--text);font-family:'Inter',sans-serif;}
@@ -59,6 +59,7 @@
     gap:10px;
   }
   .board-title svg{flex-shrink:0; color:var(--amber);}
+  .board-main .board-title{font-size:24px; letter-spacing:0.2em;}
   .tab{display:flex; align-items:center; justify-content:center;}
   .tab svg{color:currentColor;}
   .board-sub{
@@ -94,8 +95,20 @@
     padding-top:16px;
     border-top:1px dashed var(--rule);
     font-family:'Space Mono',monospace;
-    font-size:13px;
-    color:var(--text);
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    background:linear-gradient(90deg, var(--amber) 0%, #FFF3D0 50%, var(--amber) 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:shimmer 3.5s linear infinite;
+  }
+  @keyframes shimmer{
+    0%{ background-position:200% center; }
+    100%{ background-position:-200% center; }
   }
   .next-window b{color:var(--amber);}
   .next-window .countdown{color:var(--green); font-weight:700;}
@@ -136,7 +149,21 @@
     letter-spacing:0.08em; color:var(--amber); text-transform:uppercase;
   }
   .admin-bio{
-    font-size:11px; color:#FFFFFF; margin-top:4px; font-style:italic; line-height:1.3;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    font-weight:700;
+    font-style:normal;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:#FFFFFF;
+    margin-top:6px;
+    line-height:1.4;
+    text-shadow:0 0 6px rgba(255,170,0,0.8), 0 0 12px rgba(255,170,0,0.5);
+    animation:biopulse 2.4s ease-in-out infinite;
+  }
+  @keyframes biopulse{
+    0%, 100%{ opacity:0.75; text-shadow:0 0 4px rgba(255,170,0,0.5), 0 0 8px rgba(255,170,0,0.3); }
+    50%{ opacity:1; text-shadow:0 0 10px rgba(255,170,0,1), 0 0 18px rgba(255,170,0,0.7); }
   }
   .admin-contact{
     margin-top:8px; font-family:'Space Mono',monospace; font-size:12px;
@@ -452,7 +479,7 @@
           <button type="button" class="lang-btn" data-lang="hi">हिं</button>
         </div>
         <p class="board-title">
-          <svg class="icon-train-title" viewBox="0 0 48 32" width="30" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg class="icon-train-title" viewBox="0 0 48 32" width="46" height="31" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="6" y="4" width="30" height="18" rx="4" stroke="currentColor" stroke-width="2"/>
             <rect x="10" y="8" width="8" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
             <rect x="24" y="8" width="8" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
@@ -463,7 +490,6 @@
           </svg>
           <span data-i18n="title">Tatkal Desk</span>
         </p>
-        <p class="board-sub" data-i18n="subtitle">Advance requests for train ticket bookings — coordinated by one person, for friends &amp; family</p>
         <div class="flap-row">
           <div>
             <span class="flap-label">
@@ -476,7 +502,7 @@
             <div class="flap-clock" id="clockNow">--:--:--</div>
           </div>
         </div>
-        <div class="next-window" id="nextWindowBox">Loading upcoming booking windows…</div>
+        <div class="next-window" id="nextWindowBox">Be ready before Tatkal opens. I'll handle the rest.</div>
       </div>
 
       <div class="admin-card">
@@ -1118,7 +1144,6 @@ function tickClock(){
   const now = new Date();
   document.getElementById('clockNow').textContent =
     `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  renderNextWindow();
 }
 setInterval(tickClock, 1000);
 
