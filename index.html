@@ -7,17 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-    --bg-void:#FCF9F2 ;
-    --bg-panel:#e9e0b7;
-    --bg-panel-2:#eb9f53 ;
+  :root{
+    --bg-void:#0A1420;
+    --bg-panel:#101F30;
+    --bg-panel-2:#0D1A28;
     --amber:#FFAA00;
     --amber-dim:#7A5800;
     --green:#35C56A;
     --red:#FF5A5A;
-    --text:#f8f7f6;
-    --muted:#0f0f0f;
-    --rule:#050505;
+    --text:#ECEFF4;
+    --muted:#6E85A0;
+    --rule:#1E3350;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg-void);color:var(--text);font-family:'Inter',sans-serif;}
@@ -755,34 +755,11 @@
   </p>
 </div>
 
-<script type="module">
-// ---------- FIREBASE SETUP ----------
-// 1. Paste your firebaseConfig object below (from Firebase Console → Project Settings → Your apps)
-// 2. Make sure Firestore Database is enabled (Build → Firestore Database → Create database)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { initializeFirestore, collection, addDoc, getDocs, doc, updateDoc }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCxFD8cio4bOlQJHZdkSwvWY3O0-U5dfIg",
-  authDomain: "tatakl-desk.firebaseapp.com",
-  projectId: "tatakl-desk",
-  storageBucket: "tatakl-desk.firebasestorage.app",
-  messagingSenderId: "932382558637",
-  appId: "1:932382558637:web:1927dc25a723f461507924"
-};
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-const firebaseApp = initializeApp(firebaseConfig);
-const db = initializeFirestore(firebaseApp, { experimentalAutoDetectLongPolling: true });
-const requestsCol = collection(db, "requests");
+<script>
+// ---------- GOOGLE SHEETS SETUP ----------
+// This connects to the Google Apps Script "Web app" URL you deployed from
+// Extensions > Apps Script in your Google Sheet. Paste the full URL below.
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyhkJp-BeRCeU9DLOoJIe_WM4pWXeCoK56-gvLVfHqOuKl3_Meg1Nb2mhm0jdu3jbMF7w/exec";
 
 // ---------- CONFIG ----------
 const ADMIN_PASSCODE = "104729"; // 6-digit PIN — change this before sharing the link
@@ -1272,23 +1249,35 @@ async function renderNextWindow(){
   }
 }
 
-// ---------- STORAGE HELPERS (Firestore) ----------
+// ---------- STORAGE HELPERS (Google Sheets via Apps Script) ----------
 async function loadRequests(){
   try{
-    const snap = await getDocs(requestsCol);
-    return snap.docs.map(d => ({...d.data(), _docId: d.id}));
+    const res = await fetch(GAS_URL);
+    if(!res.ok) throw new Error("Network response was not OK");
+    const data = await res.json();
+    // Use each row's sheet row number as its unique id (equivalent to a doc id)
+    return data.map(r => ({...r, _docId: r._rowIndex}));
   }catch(e){
-    console.error("Firestore load error:", e);
+    console.error("Google Sheets load error:", e);
     return [];
   }
 }
 
 async function saveNewRequest(newRequest){
-  await addDoc(requestsCol, newRequest);
+  // text/plain avoids a CORS preflight request, which Apps Script web apps don't support
+  await fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(newRequest)
+  });
 }
 
 async function updateStatus(docId, status){
-  await updateDoc(doc(db, "requests", docId), { status });
+  await fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "update", rowIndex: docId, status })
+  });
 }
 
 function escapeHtml(str){
