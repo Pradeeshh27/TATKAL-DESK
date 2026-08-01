@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
+:root{
     --bg-void:#FCF9F2 ;
     --bg-panel:#e9e0b7;
     --bg-panel-2:#eb9f53 ;
@@ -146,12 +146,13 @@
     display:flex; flex-direction:column; align-items:center;
   }
   .admin-identity{
-    display:flex; align-items:center; justify-content:center; gap:8px;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
   }
-  .admin-avatar{width:44px; height:44px; flex-shrink:0;}
+  .admin-avatar{width:56px; height:56px; flex-shrink:0;}
   .admin-name{
     font-family:'Space Mono',monospace; font-weight:700; font-size:13px;
     letter-spacing:0.08em; color:var(--amber); text-transform:uppercase;
+    margin-bottom:12px;
   }
   .admin-bio{
     font-family:'Space Mono', monospace;
@@ -180,8 +181,8 @@
   @media (max-width:640px){
     .board-columns{flex-direction:column;}
     .admin-card{width:100%; flex-direction:row; gap:12px; justify-content:flex-start; text-align:left;}
-    .admin-text-group{align-items:flex-start;}
-    .admin-identity{justify-content:flex-start;}
+    .admin-text-group{align-items:center;}
+    .admin-identity{align-items:center;}
     .admin-contact{border-top:none; padding-top:0; margin-top:0; width:auto; margin-left:auto;}
   }
 
@@ -390,6 +391,7 @@
     color:#FFFFFF !important;
     letter-spacing:0.25em;
     text-shadow:0 0 10px rgba(255,170,0,0.5);
+    margin-bottom:14px;
   }
   .admin-passcode-hint{
     text-transform:uppercase;
@@ -761,23 +763,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { initializeFirestore, collection, addDoc, getDocs, doc, updateDoc }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCxFD8cio4bOlQJHZdkSwvWY3O0-U5dfIg",
-  authDomain: "tatakl-desk.firebaseapp.com",
-  projectId: "tatakl-desk",
-  storageBucket: "tatakl-desk.firebasestorage.app",
-  messagingSenderId: "932382558637",
-  appId: "1:932382558637:web:1927dc25a723f461507924"
+  apiKey: "PASTE_YOUR_API_KEY_HERE",
+  authDomain: "PASTE_YOUR_AUTH_DOMAIN_HERE",
+  projectId: "PASTE_YOUR_PROJECT_ID_HERE",
+  storageBucket: "PASTE_YOUR_STORAGE_BUCKET_HERE",
+  messagingSenderId: "PASTE_YOUR_SENDER_ID_HERE",
+  appId: "PASTE_YOUR_APP_ID_HERE"
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = initializeFirestore(firebaseApp, { experimentalAutoDetectLongPolling: true });
