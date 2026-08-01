@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
+ :root{
     --bg-void:#FCF9F2 ;
     --bg-panel:#e9e0b7;
     --bg-panel-2:#eb9f53 ;
@@ -457,7 +457,7 @@
     border:1px solid var(--rule); border-radius:6px 6px 0 0;
     font-family:'Space Mono',monospace;
   }
-  .group-head .gh-main{font-size:13px; color:var(--amber); letter-spacing:0.05em;}
+  .group-head .gh-main{font-size:13px; color:#CC5500; letter-spacing:0.05em;}
   .group-head .gh-count{font-size:11px; color:var(--muted);}
   .group-head .gh-window{font-size:11px;}
   .row{
@@ -490,37 +490,39 @@
   .whatsapp-notify{
     margin-top:8px;
     width:100%;
-    display:flex; align-items:center; justify-content:center; gap:6px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
     background:#000;
     border:1px solid #25D366;
     color:#25D366;
-    border-radius:4px;
-    padding:6px 8px;
+    border-radius:6px;
+    padding:11px 12px;
     font-family:'Space Mono',monospace;
-    font-size:10px;
+    font-size:13px;
     letter-spacing:0.05em;
     text-transform:uppercase;
     cursor:pointer;
     transition:background .12s;
   }
+  .whatsapp-notify svg{width:18px; height:18px;}
   .whatsapp-notify:hover{background:rgba(37,211,102,0.25);}
   .whatsapp-notify::after{content:"Notify";}
   .delete-request-btn{
-    margin-top:6px;
+    margin-top:8px;
     width:100%;
-    display:flex; align-items:center; justify-content:center; gap:6px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
     background:#000;
     border:1px solid var(--red);
     color:var(--red);
-    border-radius:4px;
-    padding:6px 8px;
+    border-radius:6px;
+    padding:11px 12px;
     font-family:'Space Mono',monospace;
-    font-size:10px;
+    font-size:13px;
     letter-spacing:0.05em;
     text-transform:uppercase;
     cursor:pointer;
     transition:background .12s;
   }
+  .delete-request-btn svg{width:18px; height:18px;}
   .delete-request-btn:hover{background:rgba(255,90,90,0.25);}
   .delete-request-btn::after{content:"Delete";}
   .empty-state{
@@ -1603,6 +1605,12 @@ async function refreshDashboard(){
     return;
   }
 
+  // Assign a global serial number based on true submission order across
+  // ALL requests (not reset per train/date group), so "Queue #" reflects
+  // how many requests have come in overall.
+  const globalOrder = [...filtered].sort((a,b)=> new Date(a.createdAt) - new Date(b.createdAt));
+  globalOrder.forEach((r, i)=>{ r._serial = i + 1; });
+
   // group by journeyDate + train + class
   const groups = {};
   filtered.forEach(r=>{
@@ -1619,13 +1627,14 @@ async function refreshDashboard(){
   container.innerHTML = '';
   sortedKeys.forEach(key=>{
     const [journeyDate, train, travelClass] = key.split("||");
-    const items = groups[key].sort((a,b)=> new Date(a.createdAt) - new Date(b.createdAt));
+    // Latest request first within each group
+    const items = groups[key].sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
     const windowTime = bookingWindowFor(journeyDate, travelClass);
     const now = new Date();
     const diff = windowTime - now;
     let windowLabel;
     if(diff > 0){
-      windowLabel = `opens in ${formatCountdown(diff)}`;
+      windowLabel = `<span style="color:#38BDF8">opens in ${formatCountdown(diff)}</span>`;
     } else if (windowTime.getTime() + 24*3600*1000 > now.getTime()){
       windowLabel = `<span style="color:var(--red)">WINDOW OPEN NOW</span>`;
     } else {
@@ -1641,7 +1650,7 @@ async function refreshDashboard(){
         <span class="gh-window">${windowLabel}</span>
       </div>
     `;
-    items.forEach((r, idx)=>{
+    items.forEach((r)=>{
       const row = document.createElement('div');
       row.className = 'row';
       const pax = r.passengers.map(p=>`${escapeHtml(p.name)} (${escapeHtml(p.age||'-')}${p.gender ? ', '+escapeHtml(p.gender.charAt(0)):''})`).join(', ');
@@ -1650,7 +1659,7 @@ async function refreshDashboard(){
       row.innerHTML = `
         <div>
           <span class="cell-label">Queue</span>
-          <span style="font-family:'Space Mono',monospace; color:var(--amber); font-weight:700;">#${idx+1}</span>
+          <span style="font-family:'Space Mono',monospace; color:#D9D9D9; font-weight:700;">#${r._serial}</span>
           <div class="note-text">${pax}</div>
           <div class="note-text">${escapeHtml(r.source)} → ${escapeHtml(r.destination)}</div>
         </div>
