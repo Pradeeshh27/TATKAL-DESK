@@ -7,18 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg-void:#0A1420;
-    --bg-panel:#101F30;
-    --bg-panel-2:#0D1A28;
+ :root{
+    --bg-void:#FCF9F2 ;
+    --bg-panel:#e9e0b7;
+    --bg-panel-2:#eb9f53 ;
     --amber:#FFAA00;
     --amber-dim:#7A5800;
     --green:#35C56A;
     --red:#FF5A5A;
-    --text:#ECEFF4;
-    --muted:#6E85A0;
-    --rule:#1E3350;
-  }
+    --text:#f8f7f6;
+    --muted:#0f0f0f;
+    --rule:#050505;
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg-void);color:var(--text);font-family:'Inter',sans-serif;}
   body{min-height:100vh;}
@@ -739,10 +738,10 @@
       <div class="dash-toolbar">
         <input type="text" id="searchBox" placeholder="Search name / train / mobile…" style="flex:1; min-width:180px;">
         <select id="statusFilter">
-          <option value="" style="color:#000; background:#fff;">All statuses</option>
-          <option value="pending" style="color:#000; background:#fff;">Pending</option>
-          <option value="booked" style="color:#000; background:#fff;">Booked</option>
-          <option value="failed" style="color:#000; background:#fff;">Failed</option>
+          <option value="" style="color:#fff; background:#000;">All statuses</option>
+          <option value="pending" style="color:#fff; background:#000;">Pending</option>
+          <option value="booked" style="color:#fff; background:#000;">Booked</option>
+          <option value="failed" style="color:#fff; background:#000;">Failed</option>
         </select>
       </div>
       <div id="groupsContainer"></div>
@@ -1645,9 +1644,9 @@ async function refreshDashboard(){
         </div>
         <div>
           <select class="status-select" data-docid="${r._docId}">
-            <option value="pending" style="color:#000; background:#fff;" ${r.status==='pending'?'selected':''}>Pending</option>
-            <option value="booked" style="color:#000; background:#fff;" ${r.status==='booked'?'selected':''}>Booked</option>
-            <option value="failed" style="color:#000; background:#fff;" ${r.status==='failed'?'selected':''}>Failed</option>
+            <option value="pending" style="color:#fff; background:#000;" ${r.status==='pending'?'selected':''}>Pending</option>
+            <option value="booked" style="color:#fff; background:#000;" ${r.status==='booked'?'selected':''}>Booked</option>
+            <option value="failed" style="color:#fff; background:#000;" ${r.status==='failed'?'selected':''}>Failed</option>
           </select>
           <button type="button" class="whatsapp-notify"
             data-docid="${r._docId}"
