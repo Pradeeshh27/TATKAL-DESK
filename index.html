@@ -1194,9 +1194,32 @@ setInterval(tickClock, 1000);
 
 const AC_CLASSES = ["1A","2A","3A","CC","EC"];
 
+// Google Sheets sometimes auto-converts a plain "YYYY-MM-DD" date into a full
+// timestamp (e.g. "2026-08-04T18:30:00.000Z") when it round-trips through the
+// sheet. This pulls the intended calendar date back out reliably either way.
+function toDateOnlyString(rawDate){
+  if(!rawDate) return '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) return rawDate; // already clean
+  const d = new Date(rawDate);
+  if(isNaN(d.getTime())) return rawDate;
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+// Friendly display version, e.g. "04 Aug 2026"
+function formatDateNice(rawDate){
+  const clean = toDateOnlyString(rawDate);
+  const d = new Date(clean + "T00:00:00");
+  if(isNaN(d.getTime())) return rawDate;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${String(d.getDate()).padStart(2,'0')} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 function bookingWindowFor(journeyDateStr, travelClass){
   // Tatkal opens the day before journey: 10:00 for AC classes, 11:00 for non-AC
-  const jd = new Date(journeyDateStr + "T00:00:00");
+  const jd = new Date(toDateOnlyString(journeyDateStr) + "T00:00:00");
   const openDay = new Date(jd);
   openDay.setDate(openDay.getDate() - 1);
   const hour = AC_CLASSES.includes(travelClass) ? 10 : 11;
@@ -1587,7 +1610,7 @@ async function refreshDashboard(){
     groupEl.className = 'group';
     groupEl.innerHTML = `
       <div class="group-head">
-        <span class="gh-main">${escapeHtml(journeyDate)} · ${escapeHtml(train)} · ${escapeHtml(travelClass)}</span>
+        <span class="gh-main">${escapeHtml(formatDateNice(journeyDate))} · ${escapeHtml(train)} · ${escapeHtml(travelClass)}</span>
         <span class="gh-count">${items.length} request${items.length>1?'s':''}</span>
         <span class="gh-window">${windowLabel}</span>
       </div>
@@ -1660,12 +1683,26 @@ async function refreshDashboard(){
     });
   });
 
+  // Converts plain letters/numbers to Unicode "Mathematical Sans-Serif Bold"
+  // characters — these render as genuinely bold text on WhatsApp (and
+  // everywhere else) without relying on WhatsApp's *asterisk* markdown,
+  // which showed up as literal asterisks / broken symbols for some people.
+  function boldify(str){
+    return str.split('').map(ch=>{
+      const code = ch.charCodeAt(0);
+      if(code>=65 && code<=90) return String.fromCodePoint(0x1D5D4 + (code-65));   // A-Z
+      if(code>=97 && code<=122) return String.fromCodePoint(0x1D5EE + (code-97));  // a-z
+      if(code>=48 && code<=57) return String.fromCodePoint(0x1D7EC + (code-48));   // 0-9
+      return ch;
+    }).join('');
+  }
+
   const WHATSAPP_MESSAGES = {
     en: {
       booked: (name, train, date, source, destination) =>
-        `Hi ${name}, GOOD NEWS! Your ticket for ${train} on ${date} (${source} to ${destination}) has been BOOKED. Safe travels!`,
+        `Hi ${name}, ${boldify("GOOD NEWS!")} Your ticket for ${train} on ${date} (${source} to ${destination}) has been ${boldify("BOOKED")}. Safe travels!`,
       failed: (name) =>
-        `Hi ${name}, your Tatkal booking has FAILED due to limited seat availability. We appreciate your trust and hope to assist you with your future bookings.`,
+        `Hi ${name}, your Tatkal booking has ${boldify("FAILED")} due to limited seat availability. We appreciate your trust and hope to assist you with your future bookings.`,
       pending: (name, train, date, source, destination) =>
         `Hi ${name}, your ticket request for ${train} on ${date} (${source} to ${destination}) has been received and is in queue. Will update you soon.`
     },
@@ -1691,7 +1728,7 @@ async function refreshDashboard(){
     btn.addEventListener('click', ()=>{
       const name = btn.dataset.name;
       const train = btn.dataset.train;
-      const date = btn.dataset.date;
+      const date = formatDateNice(btn.dataset.date);
       const source = btn.dataset.source;
       const destination = btn.dataset.destination;
       const mobile = btn.dataset.mobile;
