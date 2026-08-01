@@ -7,17 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg-void:#0A1420;
-    --bg-panel:#101F30;
-    --bg-panel-2:#0D1A28;
+:root{
+    --bg-void:#FCF9F2 ;
+    --bg-panel:#e9e0b7;
+    --bg-panel-2:#eb9f53 ;
     --amber:#FFAA00;
     --amber-dim:#7A5800;
     --green:#35C56A;
     --red:#FF5A5A;
-    --text:#ECEFF4;
-    --muted:#6E85A0;
-    --rule:#1E3350;
+    --text:#f8f7f6;
+    --muted:#0f0f0f;
+    --rule:#050505;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg-void);color:var(--text);font-family:'Inter',sans-serif;}
@@ -1697,12 +1697,25 @@ async function refreshDashboard(){
     }).join('');
   }
 
+  // A second, visually distinct bold style (Mathematical Bold Serif) —
+  // used for BOOKED/FAILED so they look like a different "unique font"
+  // from the sans-serif bold used for GOOD NEWS!, while both stay bold.
+  function boldifySerif(str){
+    return str.split('').map(ch=>{
+      const code = ch.charCodeAt(0);
+      if(code>=65 && code<=90) return String.fromCodePoint(0x1D400 + (code-65));   // A-Z
+      if(code>=97 && code<=122) return String.fromCodePoint(0x1D41A + (code-97));  // a-z
+      if(code>=48 && code<=57) return String.fromCodePoint(0x1D7CE + (code-48));   // 0-9
+      return ch;
+    }).join('');
+  }
+
   const WHATSAPP_MESSAGES = {
     en: {
       booked: (name, train, date, source, destination) =>
-        `Hi ${name}, ${boldify("GOOD NEWS!")} Your ticket for ${train} on ${date} (${source} to ${destination}) has been ${boldify("BOOKED")}. Safe travels!`,
+        `Hi ${name}, ${boldify("GOOD NEWS!")} Your ticket for ${train} on ${date} (${source} to ${destination}) has been ${boldifySerif("BOOKED")}. Safe travels!`,
       failed: (name) =>
-        `Hi ${name}, your Tatkal booking has ${boldify("FAILED")} due to limited seat availability. We appreciate your trust and hope to assist you with your future bookings.`,
+        `Hi ${name}, your Tatkal booking has ${boldifySerif("FAILED")} due to limited seat availability. We appreciate your trust and hope to assist you with your future bookings.`,
       pending: (name, train, date, source, destination) =>
         `Hi ${name}, your ticket request for ${train} on ${date} (${source} to ${destination}) has been received and is in queue. Will update you soon.`
     },
