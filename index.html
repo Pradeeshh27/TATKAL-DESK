@@ -739,10 +739,10 @@
       <div class="dash-toolbar">
         <input type="text" id="searchBox" placeholder="Search name / train / mobile…" style="flex:1; min-width:180px;">
         <select id="statusFilter">
-          <option value="">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="booked">Booked</option>
-          <option value="failed">Failed</option>
+          <option value="" style="color:#000; background:#fff;">All statuses</option>
+          <option value="pending" style="color:#000; background:#fff;">Pending</option>
+          <option value="booked" style="color:#000; background:#fff;">Booked</option>
+          <option value="failed" style="color:#000; background:#fff;">Failed</option>
         </select>
       </div>
       <div id="groupsContainer"></div>
@@ -1645,9 +1645,9 @@ async function refreshDashboard(){
         </div>
         <div>
           <select class="status-select" data-docid="${r._docId}">
-            <option value="pending" ${r.status==='pending'?'selected':''}>Pending</option>
-            <option value="booked" ${r.status==='booked'?'selected':''}>Booked</option>
-            <option value="failed" ${r.status==='failed'?'selected':''}>Failed</option>
+            <option value="pending" style="color:#000; background:#fff;" ${r.status==='pending'?'selected':''}>Pending</option>
+            <option value="booked" style="color:#000; background:#fff;" ${r.status==='booked'?'selected':''}>Booked</option>
+            <option value="failed" style="color:#000; background:#fff;" ${r.status==='failed'?'selected':''}>Failed</option>
           </select>
           <button type="button" class="whatsapp-notify"
             data-docid="${r._docId}"
@@ -1710,14 +1710,21 @@ async function refreshDashboard(){
     }).join('');
   }
 
+  // Adds a Unicode combining underline mark under every character —
+  // a real underline effect that works in plain WhatsApp text (no HTML
+  // needed), so key words/dates visually stand out.
+  function underline(str){
+    return str.split('').map(ch => ch + '\u0332').join('');
+  }
+
   const WHATSAPP_MESSAGES = {
     en: {
       booked: (name, train, date, source, destination) =>
-        `Hi ${name}, ${boldify("GOOD NEWS!")} Your ticket for ${train} on ${date} (${source} to ${destination}) has been ${boldifySerif("BOOKED")}. Safe travels!`,
+        `Hi ${name}, ${boldify("GOOD NEWS!")} Your ticket for ${train} on ${underline(date)} (${source} to ${destination}) has been ${underline(boldifySerif("BOOKED"))}. Safe travels!`,
       failed: (name) =>
-        `Hi ${name}, your Tatkal booking has ${boldifySerif("FAILED")} due to limited seat availability. We appreciate your trust and hope to assist you with your future bookings.`,
+        `Hi ${name}, your Tatkal booking has ${underline(boldifySerif("FAILED"))} due to limited seat availability. We appreciate your trust and hope to assist you with your future bookings.`,
       pending: (name, train, date, source, destination) =>
-        `Hi ${name}, your ticket request for ${train} on ${date} (${source} to ${destination}) has been received and is in queue. Will update you soon.`
+        `Hi ${name}, your ticket request for ${train} on ${underline(date)} (${source} to ${destination}) has been received and is in queue. Will update you soon.`
     },
     kn: {
       booked: (name, train, date, source, destination) =>
