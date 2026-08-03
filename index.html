@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
+ :root{
     --bg-void:#FCF9F2 ;
     --bg-panel:#e9e0b7;
     --bg-panel-2:#eb9f53 ;
@@ -186,23 +186,32 @@
   }
 
   /* TABS */
-  .tabs{display:flex; gap:2px; margin-bottom:20px; background:var(--bg-panel); border:1px solid var(--rule); border-radius:6px; padding:4px;}
-  .tab{
+  .bottom-nav{
+    position:fixed; left:0; right:0; bottom:0;
+    display:flex;
+    background:var(--bg-panel);
+    border-top:1px solid var(--rule);
+    padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+    z-index:100;
+    box-shadow:0 -4px 14px rgba(0,0,0,0.3);
+  }
+  .bottom-nav-item{
     flex:1;
-    text-align:center;
-    padding:10px 12px;
-    font-family:'Space Mono',monospace;
-    font-size:12px;
-    letter-spacing:0.1em;
-    text-transform:uppercase;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:6px 4px;
     color:var(--muted);
     cursor:pointer;
-    border-radius:4px;
-    transition:background .15s, color .15s;
     user-select:none;
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    border-radius:8px;
+    transition:background .15s, color .15s;
   }
-  .tab.active{background:var(--amber); color:#1a1200; font-weight:700;}
-  .tab:not(.active):hover{color:var(--text); background:rgba(255,255,255,0.03);}
+  .bottom-nav-item.active{color:var(--amber); background:rgba(255,170,0,0.1);}
+  .bottom-nav-item:not(.active):hover{color:var(--text);}
+  .wrap{padding-bottom:90px;} /* keep content clear of the fixed bottom bar */
 
   .panel{display:none;}
   .panel.active{display:block;}
@@ -329,27 +338,33 @@
   .passenger-block{
     background:var(--bg-panel-2);
     border:1px solid var(--rule);
-    border-radius:10px;
-    padding:20px 22px 18px;
-    margin:0 14px 22px;
+    border-radius:8px;
+    padding:20px 38px 18px;
+    margin:0 4px 22px;
     position:relative;
     box-shadow:0 4px 10px rgba(0,0,0,0.25);
+    overflow:hidden;
   }
-  /* Punched notches on either side, like a physical ticket stub */
-  .passenger-block::before,
-  .passenger-block::after{
-    content:"";
+  /* Two columns of 5 punched holes, running top to bottom just inside each border */
+  .ticket-holes{
     position:absolute;
-    top:46px;
-    width:22px; height:22px;
-    background:var(--bg-panel);
-    border:1px solid var(--rule);
-    border-radius:50%;
-    transform:translateY(-50%);
+    top:12px; bottom:12px;
+    width:16px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    align-items:center;
     z-index:1;
   }
-  .passenger-block::before{ left:-11px; }
-  .passenger-block::after{ right:-11px; }
+  .ticket-holes-left{ left:8px; }
+  .ticket-holes-right{ right:8px; }
+  .ticket-holes span{
+    width:9px; height:9px;
+    border-radius:50%;
+    background:var(--bg-void);
+    border:1px solid var(--rule);
+    flex-shrink:0;
+  }
   .passenger-block .passenger-label{
     font-family:'Space Mono',monospace;
     font-size:10px;
@@ -357,15 +372,13 @@
     text-transform:uppercase;
     color:var(--amber);
     display:block;
+    margin-bottom:12px;
+    position:relative;
+    z-index:2;
   }
-  /* Perforated tear-line, sitting right under the label — flows naturally
-     so it always lines up with the punched notches above */
-  .passenger-block .tear-line{
-    border-top:2px dashed var(--rule);
-    margin:12px -22px 16px;
-  }
+  .passenger-block .field-grid{position:relative; z-index:2;}
   .passenger-block .remove-p{
-    position:absolute; top:10px; right:10px;
+    position:absolute; top:10px; right:34px;
     background:none; border:none; color:var(--red);
     font-family:'Space Mono',monospace; font-size:11px; cursor:pointer;
     letter-spacing:0.05em;
@@ -637,25 +650,6 @@
     </div>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="form">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-2px; margin-right:5px;">
-        <path d="M3 9C3 7.89543 3.89543 7 5 7H19C20.1046 7 21 7.89543 21 9V10C19.8954 10 19 10.8954 19 12C19 13.1046 19.8954 14 21 14V15C21 16.1046 20.1046 17 19 17H5C3.89543 17 3 16.1046 3 15V14C4.10457 14 5 13.1046 5 12C5 10.8954 4.10457 10 3 10V9Z" stroke="currentColor" stroke-width="1.6"/>
-        <path d="M9 7V17" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 2"/>
-      </svg>
-      <span data-i18n="tabNewRequest">New Request</span>
-    </div>
-    <div class="tab" data-tab="dash">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-2px; margin-right:5px;">
-        <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/>
-        <path d="M3 9H21" stroke="currentColor" stroke-width="1.6"/>
-        <path d="M7 13H10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M7 16.5H14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
-      <span data-i18n="tabDashboard">Dashboard</span>
-    </div>
-  </div>
-
   <!-- REQUEST FORM -->
   <div class="panel active" id="panel-form">
     <div class="nature-banner">
@@ -800,10 +794,53 @@
     </div>
   </div>
 
+  <!-- MY REQUEST (customer self-check, no PIN needed) -->
+  <div class="panel" id="panel-myrequest">
+    <div class="ticket">
+      <div class="section-label">Check Your Request Status</div>
+      <p class="note-text" style="margin-bottom:16px;">Enter the mobile number you used when submitting your request.</p>
+      <div class="field-grid full">
+        <div class="field">
+          <label>Mobile number</label>
+          <input type="text" id="myMobileInput" placeholder="10-digit mobile" maxlength="10" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        </div>
+      </div>
+      <button class="submit-btn" id="myRequestBtn">Check Status</button>
+      <div id="myRequestResults" style="margin-top:20px;"></div>
+    </div>
+  </div>
+
   <p class="footer-note" data-i18n="footerNote">
     This tool only organizes requests submitted by people you know — it does not book tickets automatically.<br>
     All bookings must still be made manually on IRCTC by an authorized user, within IRCTC's rules.
   </p>
+</div>
+
+<div class="bottom-nav">
+  <div class="bottom-nav-item active" data-tab="form">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M6 10V19C6 19.55 6.45 20 7 20H17C17.55 20 18 19.55 18 19V10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M10 20V14H14V20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span data-i18n="navHome">Home</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="myrequest">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 6C4 5.45 4.45 5 5 5H19C19.55 5 20 5.45 20 6V9C18.9 9 18 9.9 18 11C18 12.1 18.9 13 20 13V16C20 16.55 19.55 17 19 17H5C4.45 17 4 16.55 4 16V13C5.1 13 6 12.1 6 11C6 9.9 5.1 9 4 9V6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M10 5.5V16.5" stroke="currentColor" stroke-width="1.8" stroke-dasharray="2 2"/>
+    </svg>
+    <span data-i18n="navMyRequest">My Request</span>
+  </div>
+  <div class="bottom-nav-item" data-tab="dash">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M3 9H21" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M7 13H10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M7 16.5H14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <span data-i18n="navDashboard">Dashboard</span>
+  </div>
 </div>
 
 <script>
@@ -823,6 +860,9 @@ const TRANSLATIONS = {
     localTime:"Local Time",
     tabNewRequest:"New Request",
     tabDashboard:"Dashboard",
+    navHome:"Home",
+    navMyRequest:"My Request",
+    navDashboard:"Dashboard",
     addPassenger:"+ Add another passenger",
     journeyDetails:"Journey Details",
     otherDetails:"Other Details",
@@ -852,6 +892,9 @@ const TRANSLATIONS = {
     localTime:"ಸ್ಥಳೀಯ ಸಮಯ",
     tabNewRequest:"ಹೊಸ ವಿನಂತಿ",
     tabDashboard:"ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    navHome:"ಮುಖಪುಟ",
+    navMyRequest:"ನನ್ನ ವಿನಂತಿ",
+    navDashboard:"ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     addPassenger:"+ ಇನ್ನೊಬ್ಬ ಪ್ರಯಾಣಿಕರನ್ನು ಸೇರಿಸಿ",
     journeyDetails:"ಪ್ರಯಾಣದ ವಿವರಗಳು",
     otherDetails:"ಇತರ ವಿವರಗಳು",
@@ -881,6 +924,9 @@ const TRANSLATIONS = {
     localTime:"स्थानीय समय",
     tabNewRequest:"नया अनुरोध",
     tabDashboard:"डैशबोर्ड",
+    navHome:"होम",
+    navMyRequest:"मेरा अनुरोध",
+    navDashboard:"डैशबोर्ड",
     addPassenger:"+ एक और यात्री जोड़ें",
     journeyDetails:"यात्रा विवरण",
     otherDetails:"अन्य विवरण",
@@ -1368,10 +1414,10 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
-// ---------- TABS ----------
-document.querySelectorAll('.tab').forEach(tab=>{
+// ---------- BOTTOM NAV ----------
+document.querySelectorAll('.bottom-nav-item').forEach(tab=>{
   tab.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.bottom-nav-item').forEach(t=>t.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
@@ -1379,6 +1425,57 @@ document.querySelectorAll('.tab').forEach(tab=>{
       refreshDashboard();
     }
   });
+});
+
+// ---------- MY REQUEST (customer self-check) ----------
+document.getElementById('myMobileInput').addEventListener('input', (e)=>{
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+});
+
+document.getElementById('myRequestBtn').addEventListener('click', async ()=>{
+  const mobile = document.getElementById('myMobileInput').value.trim();
+  const resultsBox = document.getElementById('myRequestResults');
+
+  if(!/^\d{10}$/.test(mobile)){
+    resultsBox.innerHTML = `<p class="note-text" style="color:var(--red);">Please enter a valid 10-digit mobile number.</p>`;
+    return;
+  }
+
+  resultsBox.innerHTML = `<p class="note-text">Checking…</p>`;
+
+  try{
+    const all = await loadRequests();
+    const matches = all.filter(r => r.mobile === mobile);
+
+    if(matches.length === 0){
+      resultsBox.innerHTML = `<p class="note-text">No requests found for this mobile number.</p>`;
+      return;
+    }
+
+    matches.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+
+    resultsBox.innerHTML = matches.map(r=>{
+      const statusClass = r.status === 'booked' ? 'status-booked'
+        : r.status === 'failed' ? 'status-failed'
+        : 'status-pending';
+      const statusText = r.status === 'booked' ? 'Booked'
+        : r.status === 'failed' ? 'Failed'
+        : 'Pending';
+      const pax = (r.passengers||[]).map(p=>escapeHtml(p.name)).join(', ');
+      return `
+        <div style="background:var(--bg-panel-2); border:1px solid var(--rule); border-radius:6px; padding:14px; margin-bottom:12px;">
+          <div style="font-family:'Space Mono',monospace; font-size:13px; color:var(--amber);">
+            ${escapeHtml(formatDateNice(r.journeyDate))} · ${escapeHtml(r.train)} · ${escapeHtml(r.travelClass)}
+          </div>
+          <div class="note-text" style="margin-top:6px;">${pax} — ${escapeHtml(r.source)} → ${escapeHtml(r.destination)}</div>
+          <span class="status-pill ${statusClass}" style="margin-top:8px; display:inline-block;">${statusText}</span>
+        </div>
+      `;
+    }).join('');
+  }catch(e){
+    console.error("My Request check error:", e);
+    resultsBox.innerHTML = `<p class="note-text" style="color:var(--red);">Could not check status right now. Please try again.</p>`;
+  }
 });
 
 // ---------- PASSENGER FIELDS ----------
@@ -1390,9 +1487,10 @@ function addPassengerBlock(){
   div.className = 'passenger-block';
   div.dataset.id = id;
   div.innerHTML = `
+    <div class="ticket-holes ticket-holes-left"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="ticket-holes ticket-holes-right"><span></span><span></span><span></span><span></span><span></span></div>
     ${id>1 ? `<button type="button" class="remove-p" data-remove="${id}">Remove</button>` : ''}
     <span class="passenger-label">Passenger ${id}</span>
-    <div class="tear-line"></div>
     <div class="field-grid">
       <div class="field">
         <label><span data-i18n="lblPassengerName">Passenger name</span> <span style="color:var(--red);">*</span></label>
