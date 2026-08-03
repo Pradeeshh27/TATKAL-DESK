@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
+ :root{
     --bg-void:#FCF9F2 ;
     --bg-panel:#e9e0b7;
     --bg-panel-2:#eb9f53 ;
@@ -186,6 +186,36 @@
   }
 
   /* TABS */
+  .notif-bell{
+    position:fixed;
+    top:16px; right:16px;
+    z-index:110;
+    width:40px; height:40px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg-panel);
+    border:1px solid var(--amber-dim);
+    border-radius:50%;
+    color:var(--amber);
+    cursor:pointer;
+    box-shadow:0 3px 10px rgba(0,0,0,0.35);
+    transition:background .15s;
+  }
+  .notif-bell:hover{background:rgba(255,170,0,0.12);}
+  .notif-badge{
+    position:absolute;
+    top:-4px; right:-4px;
+    min-width:18px; height:18px;
+    padding:0 4px;
+    background:var(--red);
+    color:#fff;
+    border-radius:9px;
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--bg-void);
+  }
+
   .bottom-nav{
     position:fixed; left:0; right:0; bottom:0;
     display:flex;
@@ -370,11 +400,12 @@
     font-size:10px;
     letter-spacing:0.15em;
     text-transform:uppercase;
-    color:var(--amber);
+    color:#FFFFFF;
     display:block;
     margin-bottom:12px;
     position:relative;
     z-index:2;
+    text-shadow:0 0 6px rgba(255,255,255,0.9), 0 0 12px rgba(255,255,255,0.5);
   }
   .passenger-block .field-grid{position:relative; z-index:2;}
   .passenger-block .remove-p{
@@ -383,6 +414,7 @@
     font-family:'Space Mono',monospace; font-size:11px; cursor:pointer;
     letter-spacing:0.05em;
     z-index:2;
+    text-shadow:0 0 6px rgba(255,90,90,0.9), 0 0 12px rgba(255,90,90,0.5);
   }
   .add-passenger{
     background:none; border:1px dashed var(--amber-dim); color:var(--amber);
@@ -578,6 +610,13 @@
 </style>
 </head>
 <body>
+<button type="button" class="notif-bell" id="notifBell" title="Pending requests">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 3C9.8 3 8 4.8 8 7V10.5C8 11.5 7.6 12.4 7 13.1L6 14.3C5.4 15 5.9 16 6.8 16H17.2C18.1 16 18.6 15 18 14.3L17 13.1C16.4 12.4 16 11.5 16 10.5V7C16 4.8 14.2 3 12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M10 18.5C10 19.6 10.9 20.5 12 20.5C13.1 20.5 14 19.6 14 18.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+  <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+</button>
 <div class="wrap">
 
   <div class="board">
@@ -1413,6 +1452,30 @@ function escapeHtml(str){
   div.textContent = str ?? "";
   return div.innerHTML;
 }
+
+// ---------- NOTIFICATION BELL ----------
+async function refreshNotifBadge(){
+  try{
+    const all = await loadRequests();
+    const pendingCount = all.filter(r => r.status === 'pending' || !r.status).length;
+    const badge = document.getElementById('notifBadge');
+    if(pendingCount > 0){
+      badge.textContent = pendingCount > 99 ? '99+' : pendingCount;
+      badge.style.display = 'flex';
+    }else{
+      badge.style.display = 'none';
+    }
+  }catch(e){
+    console.error("Notification badge error:", e);
+  }
+}
+refreshNotifBadge();
+setInterval(refreshNotifBadge, 60000); // refresh every minute
+
+document.getElementById('notifBell').addEventListener('click', ()=>{
+  const dashTab = document.querySelector('.bottom-nav-item[data-tab="dash"]');
+  if(dashTab) dashTab.click();
+});
 
 // ---------- BOTTOM NAV ----------
 document.querySelectorAll('.bottom-nav-item').forEach(tab=>{
