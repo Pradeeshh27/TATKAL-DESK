@@ -7,17 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-    --bg-void:#FCF9F2 ;
-    --bg-panel:#e9e0b7;
-    --bg-panel-2:#eb9f53 ;
+  :root{
+    --bg-void:#0A1420;
+    --bg-panel:#101F30;
+    --bg-panel-2:#0D1A28;
     --amber:#FFAA00;
     --amber-dim:#7A5800;
     --green:#35C56A;
     --red:#FF5A5A;
-    --text:#f8f7f6;
-    --muted:#0f0f0f;
-    --rule:#050505;
+    --text:#ECEFF4;
+    --muted:#6E85A0;
+    --rule:#1E3350;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg-void);color:var(--text);font-family:'Inter',sans-serif;}
@@ -186,7 +186,7 @@
     .admin-contact{margin-top:12px;}
   }
 
-  /* TABS */
+ /* TABS */
    .notif-bell{
     position:absolute;
     top:16px; right:16px;
@@ -246,7 +246,7 @@
 
   .panel{display:none;}
   .panel.active{display:block;}
-
+    
   /* FORM (ticket style) */
   .nature-banner{
     position:relative;
@@ -838,7 +838,7 @@
     </div>
   </div>
 
-  <!-- MY REQUEST (customer self-check, no PIN needed) -->
+ <!-- MY REQUEST (customer self-check, no PIN needed) -->
   <div class="panel" id="panel-myrequest">
     <div class="ticket">
       <div class="section-label my-request-title">Check Your Request Status</div>
@@ -888,6 +888,7 @@
 </div>
 
 <script>
+    
 // ---------- GOOGLE SHEETS SETUP ----------
 // This connects to the Google Apps Script "Web app" URL you deployed from
 // Extensions > Apps Script in your Google Sheet. Paste the full URL below.
@@ -1513,7 +1514,7 @@ document.getElementById('myRequestBtn').addEventListener('click', async ()=>{
 
   try{
     const all = await loadRequests();
-    const matches = all.filter(r => r.mobile === mobile);
+    const matches = all.filter(r => String(r.mobile).replace(/\D/g, '') === mobile);
 
     if(matches.length === 0){
       resultsBox.innerHTML = `<p class="note-text">No requests found for this mobile number.</p>`;
