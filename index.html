@@ -207,7 +207,7 @@
     .ticket-brand .brand-underline{width:40px; margin-top:6px;}
     .ticket-fields{padding-left:14px;}
     .ticket-field-row label{font-size:9px;}
-    .ticket-field-row input, .ticket-field-row select{font-size:14px;}
+    .ticket-field-row input, .ticket-field-row select{font-size:14px;height:30px}
   }
 
   /* TABS */
@@ -463,11 +463,11 @@
   }
   .ticket-brand svg{ width:52px; height:52px; color:#3E2712; margin-bottom:12px; }
   .ticket-brand .brand-name{
-    font-family:'Space Mono',monospace; font-weight:700; font-size:18px;
+    font-family:'Space Mono',monospace; font-weight:700; font-size:clamp(15px,2.8vw,18px);
     color:#3E2712; letter-spacing:0.02em; line-height:1.1;
   }
   .ticket-brand .brand-sub{
-    font-family:'Space Mono',monospace; font-weight:700; font-size:18px;
+    font-family:'Space Mono',monospace; font-weight:700; font-size:clamp(14px,2.6vw,18px);
     color:#C1440E; letter-spacing:0.02em; line-height:1.1; margin-top:2px;
   }
   .ticket-brand .brand-underline{
@@ -532,6 +532,17 @@
     font-family:'Space Mono',monospace;
     display:none;
   }
+
+ input:focus,
+select:focus,
+textarea:focus{
+    outline:none;
+    border:1.8px solid var(--amber);
+    box-shadow:
+        0 0 0 3px rgba(255,170,0,.18),
+        0 0 12px rgba(255,170,0,.35);
+    border-radius:6px;
+}
 
   /* DASHBOARD GATE */
   .gate{
