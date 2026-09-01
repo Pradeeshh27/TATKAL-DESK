@@ -393,7 +393,7 @@
   }
   .admin-contact:hover{color:#FFFFFF;}
   .admin-contact-sub{
-    font-size:10px; color:var(--muted); margin-top:3px; font-style:italic;
+    font-size:10px; color:rgba(255,255,255,0.65); margin-top:3px; font-style:italic;
   }
   .help-option{
     display:flex; align-items:center; gap:14px;
@@ -439,6 +439,7 @@
   }
 
 }
+....before notification bell
 
   /* TABS */
   .notif-bell{
@@ -752,7 +753,7 @@
   }
   .ticket-brand svg{ width:52px; height:52px; color:#3E2712; margin-bottom:12px; }
   .ticket-brand .brand-name{
-font-family:'Space Mono',monospace; font-weight:700; font-size:clamp(14px,3vw,20px);
+   font-family:'Space Mono',monospace; font-weight:700; font-size:clamp(14px,3vw,20px);
     color:#3E2712; letter-spacing:0.02em; line-height:1.1;
   }
   .ticket-brand .brand-sub{
@@ -1295,8 +1296,8 @@ textarea:focus{
           <div class="stat-label">Active Requests</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num" id="statToday">0</div>
-          <div class="stat-label">Today's Bookings</div>
+          <div class="stat-num" id="statFailed">0</div>
+          <div class="stat-label">Failed Bookings</div>
         </div>
         <div class="stat-card">
           <div class="stat-num" id="statTotal">0</div>
@@ -1305,16 +1306,6 @@ textarea:focus{
       </div>
 
       <div id="activeView">
-        <div class="dash-section" id="needsAttentionSection" style="display:none;">
-          <div class="dash-section-title dash-section-attention">⚠ Needs Attention</div>
-          <div id="needsAttentionList"></div>
-        </div>
-
-        <div class="dash-section" id="inProgressSection" style="display:none;">
-          <div class="dash-section-title dash-section-progress">⏳ In Progress</div>
-          <div id="inProgressList"></div>
-        </div>
-
         <div class="dash-section">
           <div class="dash-section-title">🕐 Pending Requests</div>
           <div class="dash-toolbar">
@@ -1322,8 +1313,6 @@ textarea:focus{
             <select id="statusFilter">
               <option value="" style="color:#fff; background:#000;">All statuses</option>
               <option value="pending" style="color:#fff; background:#000;">Pending</option>
-              <option value="in_progress" style="color:#fff; background:#000;">In Progress</option>
-              <option value="action_required" style="color:#fff; background:#000;">Needs Attention</option>
             </select>
           </div>
           <div id="groupsContainer"></div>
@@ -1344,7 +1333,6 @@ textarea:focus{
             <option value="" style="color:#fff; background:#000;">All</option>
             <option value="confirmed" style="color:#fff; background:#000;">Confirmed</option>
             <option value="failed" style="color:#fff; background:#000;">Failed</option>
-            <option value="cancelled" style="color:#fff; background:#000;">Cancelled</option>
           </select>
         </div>
         <div id="historyList"></div>
@@ -2368,6 +2356,33 @@ function bookingWindowFor(journeyDateStr, travelClass){
   return openDay;
 }
 
+// Tells the admin exactly which calendar day the booking window opens on,
+// so a countdown like "opens in 02h 24m 18s" can't be misread — it's always
+// paired with an explicit "BOOKING TODAY" / "BOOKING TOMORROW" tag.
+function bookingDayLabel(journeyDateStr){
+  const cleanDate = toDateOnlyString(journeyDateStr);
+  const jd = new Date(cleanDate + "T00:00:00");
+  const openDay = new Date(jd);
+  openDay.setDate(openDay.getDate() - 1); // booking opens the day before journey
+
+  const now = new Date();
+  const todayStr = now.toDateString();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toDateString();
+  const openDayStr = openDay.toDateString();
+
+  if(openDayStr === todayStr){
+    return '<span style="color:var(--green); font-weight:700;">· BOOKING TODAY</span>';
+  }else if(openDayStr === tomorrowStr){
+    return '<span style="color:var(--amber); font-weight:700;">· BOOKING TOMORROW</span>';
+  }else if(openDay < now){
+    return '';
+  }else{
+    return `· BOOKING ON ${openDay.toLocaleDateString()}`;
+  }
+}
+
 function formatCountdown(ms){
   if(ms <= 0) return null;
   const totalSec = Math.floor(ms/1000);
@@ -3016,11 +3031,10 @@ function normalizeStatus(status){
 }
 
 const STATUS_LABELS = {
-  pending:'Pending', in_progress:'In Progress', action_required:'Needs Attention',
-  confirmed:'Confirmed', failed:'Failed', cancelled:'Cancelled'
+  pending:'Pending', confirmed:'Confirmed', failed:'Failed'
 };
-const ACTIVE_STATUSES = ['pending','in_progress','action_required'];
-const HISTORY_STATUSES = ['confirmed','failed','cancelled'];
+const ACTIVE_STATUSES = ['pending'];
+const HISTORY_STATUSES = ['confirmed','failed'];
 
 // ---------- WHATSAPP MESSAGE HELPERS (shared across all sections) ----------
 function boldify(str){
@@ -3174,33 +3188,11 @@ function makeCardEl(r){
 // ---------- STATS ----------
 function renderStats(all){
   const activeCount = all.filter(r => ACTIVE_STATUSES.includes(r.status)).length;
-  const todayStr = new Date().toDateString();
-  const todayCount = all.filter(r => r.status === 'confirmed' && new Date(r.createdAt).toDateString() === todayStr).length;
+  const failedCount = all.filter(r => r.status === 'failed').length;
   const totalCount = all.filter(r => r.status === 'confirmed').length;
   document.getElementById('statActive').textContent = activeCount;
-  document.getElementById('statToday').textContent = todayCount;
+  document.getElementById('statFailed').textContent = failedCount;
   document.getElementById('statTotal').textContent = totalCount;
-}
-
-// ---------- ACTIVE VIEW SECTIONS ----------
-function renderNeedsAttention(all){
-  const section = document.getElementById('needsAttentionSection');
-  const list = document.getElementById('needsAttentionList');
-  const items = all.filter(r => r.status === 'action_required').sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
-  if(items.length === 0){ section.style.display = 'none'; return; }
-  section.style.display = 'block';
-  list.innerHTML = '';
-  items.forEach(r => list.appendChild(makeCardEl(r)));
-}
-
-function renderInProgress(all){
-  const section = document.getElementById('inProgressSection');
-  const list = document.getElementById('inProgressList');
-  const items = all.filter(r => r.status === 'in_progress').sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
-  if(items.length === 0){ section.style.display = 'none'; return; }
-  section.style.display = 'block';
-  list.innerHTML = '';
-  items.forEach(r => list.appendChild(makeCardEl(r)));
 }
 
 function renderRecentCompleted(all){
@@ -3262,6 +3254,7 @@ function renderPendingGroups(all){
     } else {
       windowLabel = `window passed`;
     }
+    windowLabel += ` ${bookingDayLabel(journeyDate)}`;
 
     const groupEl = document.createElement('div');
     groupEl.className = 'group';
@@ -3317,8 +3310,6 @@ async function refreshDashboard(){
   ALL_REQUESTS_CACHE = list;
 
   renderStats(list);
-  renderNeedsAttention(list);
-  renderInProgress(list);
   renderPendingGroups(list);
   renderRecentCompleted(list);
 
