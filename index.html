@@ -425,7 +425,7 @@
     .ticket-brand .brand-underline{width:40px; margin-top:6px;}
     .ticket-fields{padding-left:14px;}
     .ticket-field-row label{font-size:9px;}
-    .ticket-field-row input, .ticket-field-row select{font-size:14px;height:30px;}
+    .ticket-field-row input, .ticket-field-row select{font-size:14px;height:30px;} 
     .group-head{flex-direction:column; align-items:flex-start; gap:5px;}
     .group-head .gh-count{margin-top:2px;}
     .group-head .gh-window{margin-top:2px;}
@@ -439,6 +439,7 @@
   }
 
 }
+/*before notification bell*/
 
   /* TABS */
   .notif-bell{
@@ -752,7 +753,7 @@
   }
   .ticket-brand svg{ width:52px; height:52px; color:#3E2712; margin-bottom:12px; }
   .ticket-brand .brand-name{
-    font-family:'Space Mono',monospace; font-weight:700; font-size:clamp(14px,3vw,20px);
+   font-family:'Space Mono',monospace; font-weight:700; font-size:clamp(14px,3vw,20px);
     color:#3E2712; letter-spacing:0.02em; line-height:1.1;
   }
   .ticket-brand .brand-sub{
@@ -832,7 +833,52 @@
     display:none;
   }
 
-  input:focus,
+  .pay-badge{
+    display:inline-block; margin-top:6px; padding:3px 8px; border-radius:10px;
+    font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
+  }
+  .pay-verified{background:rgba(53,197,106,0.18); color:#167a3e; border:1px solid #35C56A;}
+  .pay-submitted{background:rgba(0,119,182,0.12); color:#0077B6; border:1px solid #0077B6;}
+  .pay-unpaid{background:rgba(139,0,0,0.08); color:#8B0000; border:1px solid #8B0000;}
+  .verify-payment-btn{
+    display:block; margin-top:6px; padding:6px 10px; cursor:pointer;
+    background:#000; color:#35C56A; border:1px solid #35C56A; border-radius:4px;
+    font-family:'Space Mono',monospace; font-size:10px; text-transform:uppercase;
+  }
+  .payment-panel{
+    margin-top:22px; padding:22px;
+    background:#FFF8E8; border:1px solid #B89B63;
+    border-radius:10px; text-align:center;
+  }
+  .payment-title{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:16px;
+    color:#8B0000; margin-bottom:8px;
+  }
+  .payment-sub{
+    font-size:13px; color:#3B2A1E; line-height:1.5; margin-bottom:14px;
+  }
+  .payment-amount{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:18px;
+    color:#3B2A1E; margin-bottom:14px;
+  }
+  .payment-amount span{color:#8B0000;}
+  .payment-qr{
+    width:180px; height:180px; margin:0 auto 14px;
+    display:block; border:1px solid #B89B63; border-radius:8px; background:#fff; padding:8px;
+  }
+  .payment-upi-row{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:13px; color:#3B2A1E; margin-bottom:6px; flex-wrap:wrap;
+  }
+  .payment-upi-label{font-weight:700;}
+  .payment-upi-id{font-family:'Space Mono',monospace; color:#8B0000;}
+  .payment-copy-btn{
+    background:none; border:1px solid #B89B63; color:#3B2A1E;
+    border-radius:4px; padding:3px 10px; font-size:11px; cursor:pointer;
+  }
+  .payment-copy-btn:hover{background:rgba(184,155,99,0.15);}
+
+input:focus,
 select:focus,
 textarea:focus{
     outline:none;
@@ -842,6 +888,7 @@ textarea:focus{
         0 0 14px rgba(79,157,255,.45);
     border-radius:6px;
 }
+
 
   /* DASHBOARD GATE */
   .gate{
@@ -1248,6 +1295,24 @@ textarea:focus{
 
       <button class="submit-btn" id="submitBtn" data-i18n="submitBtn">Submit request</button>
       <div class="confirm-box" id="confirmBox"></div>
+
+      <div class="payment-panel" id="paymentPanel" style="display:none;">
+        <div class="payment-title">💳 Complete Payment</div>
+        <p class="payment-sub">Scan the QR code with any UPI app to pay the convenience fee. Once paid, enter your transaction reference below so we can verify it.</p>
+        <div class="payment-amount">Amount: <span id="paymentAmountDisplay">₹0</span></div>
+        <img id="paymentQR" class="payment-qr" src="" alt="UPI QR Code">
+        <div class="payment-upi-row">
+          <span class="payment-upi-label">UPI ID:</span>
+          <span class="payment-upi-id" id="paymentUpiId"></span>
+          <button type="button" class="payment-copy-btn" id="paymentCopyBtn">Copy</button>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label>UPI Transaction ID / UTR Number <span style="color:var(--red);">*</span></label>
+          <input type="text" id="paymentUtrInput" placeholder="e.g. 123456789012" maxlength="30">
+        </div>
+        <button type="button" class="submit-btn" id="submitPaymentBtn">I've Paid — Submit Reference</button>
+        <div class="confirm-box" id="paymentConfirmBox"></div>
+      </div>
     </div>
   </div>
 
@@ -1648,6 +1713,13 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbyhkJp-BeRCeU9DLOoJIe_W
 
 // ---------- CONFIG ----------
 const ADMIN_PASSCODE = "104729"; // 6-digit PIN — change this before sharing the link
+
+// ---------- PAYMENT SETTINGS ----------
+// Replace with your real UPI ID (e.g. "yourname@okhdfcbank"). Payments go
+// straight to this UPI ID — the site never touches or stores money itself.
+const UPI_ID = "PASTE_YOUR_UPI_ID_HERE";
+const UPI_PAYEE_NAME = "FastFinger Tatkal Desk";
+const SERVICE_FEE = 150; // convenience fee per request, in ₹ — edit as needed
 
 // ---------- LANGUAGE / TRANSLATIONS ----------
 const TRANSLATIONS = {
@@ -2213,7 +2285,16 @@ const TRAINS = [
   {num:"16514",nm:"Bengaluru Express (Karwar–Bengaluru)"},{num:"16513",nm:"Karwar Express (Bengaluru–Karwar)"},
   {num:"06268",nm:"Karwar–Yesvantpur Special"},{num:"06267",nm:"Yesvantpur–Karwar Special"},
   {num:"16595",nm:"Panchaganga Express"},{num:"16596",nm:"Panchaganga Express"},
-  {num:"16585",nm:"Murdeshwar Express"},{num:"16586",nm:"Murdeshwar Express"}
+  {num:"16585",nm:"Murdeshwar Express"},{num:"16586",nm:"Murdeshwar Express"},
+  {num:"12625",nm:"Kerala Express (New Delhi–Thiruvananthapuram)"},{num:"12626",nm:"Kerala Express (Thiruvananthapuram–New Delhi)"},
+  {num:"12695",nm:"Trivandrum Mail (Chennai–Thiruvananthapuram)"},{num:"12696",nm:"Trivandrum Mail (Thiruvananthapuram–Chennai)"},
+  {num:"16381",nm:"Kanyakumari Express"},{num:"16382",nm:"Kanyakumari Express (Return)"},
+  {num:"16649",nm:"Parasuram Express (Mangaluru–Thiruvananthapuram)"},{num:"16650",nm:"Parasuram Express (Return)"},
+  {num:"16629",nm:"Malabar Express (Nagercoil–Mangaluru)"},{num:"16630",nm:"Malabar Express (Return)"},
+  {num:"12075",nm:"Jan Shatabdi Express (Ernakulam–Thiruvananthapuram)"},{num:"12076",nm:"Jan Shatabdi Express (Return)"},
+  {num:"16302",nm:"Ananthapuri Express (Thiruvananthapuram–Chennai)"},{num:"16301",nm:"Ananthapuri Express (Return)"},
+  {num:"16127",nm:"Guruvayur Express (Chennai–Guruvayur)"},{num:"16128",nm:"Guruvayur Express (Return)"},
+  {num:"16303",nm:"Venad Express (Thiruvananthapuram–Shoranur)"},{num:"16304",nm:"Venad Express (Return)"}
 ];
 TRAINS.sort((a, b) => a.nm.localeCompare(b.nm)); // alphabetical order
 
@@ -2463,6 +2544,25 @@ async function deleteRequestRow(docId){
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action: "delete", rowIndex: docId })
+  });
+}
+
+// The customer's browser doesn't know the new row's sheet position yet (the
+// save just appended it), so this matches by the request's own unique ID
+// instead of a row index — safer for something submitted moments earlier.
+async function submitPaymentReference(requestId, utr, amount){
+  await fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "submitPayment", requestId, utr, amount })
+  });
+}
+
+async function verifyPaymentRow(docId){
+  await fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "verifyPayment", rowIndex: docId })
   });
 }
 
@@ -2845,6 +2945,54 @@ mobileInput.addEventListener('paste', (e)=>{
 });
 
 // ---------- SUBMIT ----------
+// ---------- PAYMENT (UPI QR) ----------
+let currentPaymentRequestId = null;
+
+function showPaymentPanel(requestId){
+  currentPaymentRequestId = requestId;
+  const upiUri = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${SERVICE_FEE}&cu=INR&tn=${encodeURIComponent('Tatkal Desk ' + requestId)}`;
+  document.getElementById('paymentQR').src =
+    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
+  document.getElementById('paymentAmountDisplay').textContent = '\u20B9' + SERVICE_FEE;
+  document.getElementById('paymentUpiId').textContent = UPI_ID;
+  document.getElementById('paymentUtrInput').value = '';
+  const box = document.getElementById('paymentConfirmBox');
+  box.style.display = 'none';
+  document.getElementById('paymentPanel').style.display = 'block';
+  document.getElementById('submitPaymentBtn').disabled = false;
+  document.getElementById('paymentPanel').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+document.getElementById('paymentCopyBtn').addEventListener('click', async ()=>{
+  try{
+    await navigator.clipboard.writeText(UPI_ID);
+    const b = document.getElementById('paymentCopyBtn');
+    b.textContent = 'Copied ✓';
+    setTimeout(()=>{ b.textContent = 'Copy'; }, 1800);
+  }catch(e){ alert('UPI ID: ' + UPI_ID); }
+});
+
+document.getElementById('submitPaymentBtn').addEventListener('click', async ()=>{
+  const utr = document.getElementById('paymentUtrInput').value.trim();
+  const box = document.getElementById('paymentConfirmBox');
+  if(!/^[A-Za-z0-9]{8,30}$/.test(utr)){
+    alert('Please enter a valid UPI Transaction ID / UTR number (8-30 letters or digits).');
+    return;
+  }
+  const btn = document.getElementById('submitPaymentBtn');
+  btn.disabled = true;
+  try{
+    await submitPaymentReference(currentPaymentRequestId, utr, SERVICE_FEE);
+    box.style.display = 'block';
+    box.textContent = "Payment reference submitted. We'll verify it and proceed with your booking — you'll be updated on WhatsApp. You can also check status under \"My Request\".";
+    document.getElementById('paymentUtrInput').value = '';
+  }catch(e){
+    console.error('Payment reference error:', e);
+    btn.disabled = false;
+    alert('Could not submit the payment reference. Please try again.');
+  }
+});
+
 document.getElementById('submitBtn').addEventListener('click', async ()=>{
   const btn = document.getElementById('submitBtn');
   const passengers = [...document.querySelectorAll('.passenger-block')].map(block=>({
@@ -2910,11 +3058,9 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
 
   document.getElementById('confirmBox').style.display = 'block';
   document.getElementById('confirmBox').textContent =
-    `Request received — ID ${newRequest.id}. We'll message you on WhatsApp once it's booked. You can also check your status anytime under "My Request".`;
+    `Request received — ID ${newRequest.id}. Please complete payment below to proceed.`;
 
-  setTimeout(()=>{
-    document.getElementById('confirmBox').style.display = 'none';
-  }, 9000);
+  showPaymentPanel(newRequest.id);
 
   // reset form right away
   document.getElementById('passengerContainer').innerHTML = '';
@@ -3113,6 +3259,18 @@ function buildStatusOptions(currentStatus){
   ).join('');
 }
 
+function buildPaymentBadge(r){
+  const ps = r.paymentStatus || '';
+  if(ps === 'verified'){
+    return `<div class="pay-badge pay-verified">Payment Verified${r.upiTxnId ? ' · '+escapeHtml(String(r.upiTxnId)) : ''}</div>`;
+  }
+  if(ps === 'submitted'){
+    return `<div class="pay-badge pay-submitted">Payment Submitted · UTR ${escapeHtml(String(r.upiTxnId || ''))}</div>
+      <button type="button" class="verify-payment-btn" data-docid="${r._docId}">Verify Payment</button>`;
+  }
+  return `<div class="pay-badge pay-unpaid">Payment Pending</div>`;
+}
+
 function buildRequestCardHTML(r){
   const pax = r.passengers.map(p=>`${escapeHtml(p.name)} (${escapeHtml(p.age||'-')}${p.gender ? ', '+escapeHtml(p.gender.charAt(0)):''})`).join(', ');
   const submitted = new Date(r.createdAt);
@@ -3142,6 +3300,7 @@ function buildRequestCardHTML(r){
       <span class="cell-label">Notes / ID</span>
       <span class="note-text">${escapeHtml(r.id)}</span>
       <div class="note-text">${escapeHtml(r.notes || '')} ${escapeHtml(r.train)}</div>
+      ${buildPaymentBadge(r)}
     </div>
     <div>
       <select class="status-select" data-docid="${r._docId}">
@@ -3366,6 +3525,20 @@ document.getElementById('dashContent').addEventListener('click', async (e)=>{
     const phoneWithCountryCode = '91' + mobile;
     const url = `https://wa.me/${phoneWithCountryCode}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
+    return;
+  }
+
+  const verifyBtn = e.target.closest('.verify-payment-btn');
+  if(verifyBtn){
+    verifyBtn.disabled = true;
+    try{
+      await verifyPaymentRow(verifyBtn.dataset.docid);
+      await refreshDashboard();
+    }catch(err){
+      console.error("Verify payment error:", err);
+      alert("Could not verify payment. Please try again.");
+      verifyBtn.disabled = false;
+    }
     return;
   }
 
