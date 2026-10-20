@@ -3669,25 +3669,10 @@ document.getElementById('dashContent').addEventListener('click', async (e)=>{
     return;
   }
 
-  const rejectBtn = e.target.closest('.reject-payment-btn');
-  if(rejectBtn){
-    const confirmed = confirm("Reject this payment reference? The customer will be able to submit a new one.");
-    if(!confirmed) return;
-    rejectBtn.disabled = true;
-    try{
-      await rejectPaymentRow(rejectBtn.dataset.docid);
-      await refreshDashboard();
-    }catch(err){
-      console.error("Reject payment error:", err);
-      alert("Could not reject payment. Please try again.");
-      rejectBtn.disabled = false;
-    }
-    return;
-  }
-
+  
   const requestPayBtn = e.target.closest('.request-payment-btn');
   if(requestPayBtn){
-    const form = document.getElementById('payForm-' + requestPayBtn.dataset.docid);
+    const form = document.getElementById('payForm_' + requestPayBtn.dataset.docid);
     if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
     return;
   }
@@ -3695,14 +3680,27 @@ document.getElementById('dashContent').addEventListener('click', async (e)=>{
   const sendPayReqBtn = e.target.closest('.send-payment-request-btn');
   if(sendPayReqBtn){
     const docId = sendPayReqBtn.dataset.docid;
-    const form = document.getElementById('payForm-' + docId);
-    const fareInput = form.querySelector('.pay-ticket-fare');
-    const feeInput = form.querySelector('.pay-service-fee');
+    const form = document.getElementById('payForm_' + docId);
+
+    if(!form){
+      alert("Payment form not found. Please refresh the page.");
+      return;
+    }
+
+    const fareInput = form.querySelector('.pay-fare-input');
+    const feeInput = form.querySelector('.pay-fee-input');
+
+    if(!fareInput || !feeInput){
+      alert("Payment input fields not found. Please refresh the page.");
+      return;
+    }
+
     const ticketFare = parseFloat(fareInput.value);
     const serviceFee = parseFloat(feeInput.value);
 
-    if(isNaN(ticketFare) || ticketFare < 0 || isNaN(serviceFee) || serviceFee < 0){
-      alert("Please enter a valid Ticket Fare and Service/Convenience Fee (0 or more).");
+    if(!Number.isFinite(ticketFare) || ticketFare < 0 ||
+       !Number.isFinite(serviceFee) || serviceFee < 0){
+      alert("Please enter a valid Ticket Fare and Service Fee.");
       return;
     }
 
@@ -3711,12 +3709,16 @@ document.getElementById('dashContent').addEventListener('click', async (e)=>{
       await requestPaymentForRow(docId, ticketFare, serviceFee);
       await refreshDashboard();
     }catch(err){
-      console.error("Request payment error:", err);
+      console.error("Request Payment error:", err);
       alert("Could not send the payment request. Please try again.");
       sendPayReqBtn.disabled = false;
     }
     return;
   }
+
+
+
+  
 
   const deleteBtn = e.target.closest('.delete-request-btn');
   if(deleteBtn){
