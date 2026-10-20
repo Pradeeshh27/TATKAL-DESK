@@ -425,11 +425,12 @@
     .ticket-brand .brand-underline{width:40px; margin-top:6px;}
     .ticket-fields{padding-left:14px;}
     .ticket-field-row label{font-size:9px;}
-    .ticket-field-row input, .ticket-field-row select{font-size:14px;height:30px;} 
+    .ticket-field-row input, .ticket-field-row select{font-size:14px;height:30px;}
     .group-head{flex-direction:column; align-items:flex-start; gap:5px;}
     .group-head .gh-count{margin-top:2px;}
     .group-head .gh-window{margin-top:2px;}
   }
+
 
   @media (max-width:640px) {
 
@@ -439,7 +440,7 @@
   }
 
 }
-/*before notification bell*/
+/* +/before notification bell+/ */
 
   /* TABS */
   .notif-bell{
@@ -840,10 +841,37 @@
   .pay-verified{background:rgba(53,197,106,0.18); color:#167a3e; border:1px solid #35C56A;}
   .pay-submitted{background:rgba(0,119,182,0.12); color:#0077B6; border:1px solid #0077B6;}
   .pay-unpaid{background:rgba(139,0,0,0.08); color:#8B0000; border:1px solid #8B0000;}
+  .pay-requested{background:rgba(255,170,0,0.12); color:#8a5a00; border:1px solid var(--amber-dim);}
+  .pay-admin-actions{display:flex; gap:6px; margin-top:6px;}
   .verify-payment-btn{
-    display:block; margin-top:6px; padding:6px 10px; cursor:pointer;
+    flex:1; padding:6px 10px; cursor:pointer;
     background:#000; color:#35C56A; border:1px solid #35C56A; border-radius:4px;
     font-family:'Space Mono',monospace; font-size:10px; text-transform:uppercase;
+  }
+  .reject-payment-btn{
+    flex:1; padding:6px 10px; cursor:pointer;
+    background:#000; color:var(--red); border:1px solid var(--red); border-radius:4px;
+    font-family:'Space Mono',monospace; font-size:10px; text-transform:uppercase;
+  }
+  .request-payment-btn{
+    display:block; width:100%; margin-top:6px; padding:7px 10px; cursor:pointer;
+    background:#000; color:var(--amber); border:1px solid var(--amber); border-radius:4px;
+    font-family:'Space Mono',monospace; font-size:10px; text-transform:uppercase;
+  }
+  .request-payment-form{
+    margin-top:10px; padding:12px;
+    background:rgba(255,255,255,0.5); border:1px dashed #B89B63; border-radius:6px;
+  }
+  .request-payment-form .field label{font-size:10px;}
+  .request-payment-form .field input{padding:7px 10px; font-size:13px;}
+  .pay-total-preview{
+    margin-top:10px; font-family:'Space Mono',monospace; font-size:13px; font-weight:700;
+    color:#8B0000;
+  }
+  .send-payment-request-btn{
+    display:block; width:100%; margin-top:10px; padding:8px; cursor:pointer;
+    background:var(--amber); color:#1a1200; border:none; border-radius:4px;
+    font-family:'Space Mono',monospace; font-size:11px; font-weight:700; text-transform:uppercase;
   }
   .payment-panel{
     margin-top:22px; padding:22px;
@@ -888,6 +916,8 @@ textarea:focus{
         0 0 14px rgba(79,157,255,.45);
     border-radius:6px;
 }
+
+
 
 
   /* DASHBOARD GATE */
@@ -1164,7 +1194,7 @@ textarea:focus{
             <path d="M2 22L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path d="M36 18L42 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <span data-i18n="title">Tatkal Desk</span>
+          <span data-i18n="title">Tatkal Desk</span> <span style="font-size:0.55em; vertical-align:middle;">🧿</span>
         </p>
         <div class="flap-row">
           <div>
@@ -1295,24 +1325,6 @@ textarea:focus{
 
       <button class="submit-btn" id="submitBtn" data-i18n="submitBtn">Submit request</button>
       <div class="confirm-box" id="confirmBox"></div>
-
-      <div class="payment-panel" id="paymentPanel" style="display:none;">
-        <div class="payment-title">💳 Complete Payment</div>
-        <p class="payment-sub">Scan the QR code with any UPI app to pay the convenience fee. Once paid, enter your transaction reference below so we can verify it.</p>
-        <div class="payment-amount">Amount: <span id="paymentAmountDisplay">₹0</span></div>
-        <img id="paymentQR" class="payment-qr" src="" alt="UPI QR Code">
-        <div class="payment-upi-row">
-          <span class="payment-upi-label">UPI ID:</span>
-          <span class="payment-upi-id" id="paymentUpiId"></span>
-          <button type="button" class="payment-copy-btn" id="paymentCopyBtn">Copy</button>
-        </div>
-        <div class="field" style="margin-top:14px;">
-          <label>UPI Transaction ID / UTR Number <span style="color:var(--red);">*</span></label>
-          <input type="text" id="paymentUtrInput" placeholder="e.g. 123456789012" maxlength="30">
-        </div>
-        <button type="button" class="submit-btn" id="submitPaymentBtn">I've Paid — Submit Reference</button>
-        <div class="confirm-box" id="paymentConfirmBox"></div>
-      </div>
     </div>
   </div>
 
@@ -1717,9 +1729,10 @@ const ADMIN_PASSCODE = "104729"; // 6-digit PIN — change this before sharing t
 // ---------- PAYMENT SETTINGS ----------
 // Replace with your real UPI ID (e.g. "yourname@okhdfcbank"). Payments go
 // straight to this UPI ID — the site never touches or stores money itself.
+// Ticket Fare and Service Fee are NOT fixed here — the admin sets both,
+// per request, from the Dashboard.
 const UPI_ID = "PASTE_YOUR_UPI_ID_HERE";
 const UPI_PAYEE_NAME = "FastFinger Tatkal Desk";
-const SERVICE_FEE = 150; // convenience fee per request, in ₹ — edit as needed
 
 // ---------- LANGUAGE / TRANSLATIONS ----------
 const TRANSLATIONS = {
@@ -2547,14 +2560,15 @@ async function deleteRequestRow(docId){
   });
 }
 
-// The customer's browser doesn't know the new row's sheet position yet (the
-// save just appended it), so this matches by the request's own unique ID
-// instead of a row index — safer for something submitted moments earlier.
-async function submitPaymentReference(requestId, utr, amount){
+// By the time a customer can submit a UTR, the row already exists and they
+// already have its row index (from loadRequests() on the My Request page) —
+// so, unlike the original request-submission flow, matching by row index
+// here is reliable.
+async function submitPaymentReference(docId, utr){
   await fetch(GAS_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action: "submitPayment", requestId, utr, amount })
+    body: JSON.stringify({ action: "submitPayment", rowIndex: docId, utr })
   });
 }
 
@@ -2563,6 +2577,24 @@ async function verifyPaymentRow(docId){
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action: "verifyPayment", rowIndex: docId })
+  });
+}
+
+async function rejectPaymentRow(docId){
+  await fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "rejectPayment", rowIndex: docId })
+  });
+}
+
+// Admin sets the fare + fee for THIS specific request — nothing is hard-coded.
+async function requestPaymentForRow(docId, ticketFare, serviceFee){
+  const totalAmount = ticketFare + serviceFee;
+  await fetch(GAS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "requestPayment", rowIndex: docId, ticketFare, serviceFee, totalAmount })
   });
 }
 
@@ -2818,9 +2850,12 @@ document.getElementById('myRequestBtn').addEventListener('click', async ()=>{
           </div>
           <div class="st-pax">${pax} — ${escapeHtml(r.source)} → ${escapeHtml(r.destination)}</div>
           <span class="status-pill ${statusClass} st-status" style="display:inline-block;">${statusText}</span>
+          ${buildUserPaymentSection(r)}
         </div>
       `;
     }).join('');
+
+    wireUserPaymentSections();
   }catch(e){
     console.error("My Request check error:", e);
     resultsBox.innerHTML = `<p class="note-text" style="color:var(--red);">Could not check status right now. Please try again.</p>`;
@@ -2945,54 +2980,6 @@ mobileInput.addEventListener('paste', (e)=>{
 });
 
 // ---------- SUBMIT ----------
-// ---------- PAYMENT (UPI QR) ----------
-let currentPaymentRequestId = null;
-
-function showPaymentPanel(requestId){
-  currentPaymentRequestId = requestId;
-  const upiUri = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${SERVICE_FEE}&cu=INR&tn=${encodeURIComponent('Tatkal Desk ' + requestId)}`;
-  document.getElementById('paymentQR').src =
-    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
-  document.getElementById('paymentAmountDisplay').textContent = '\u20B9' + SERVICE_FEE;
-  document.getElementById('paymentUpiId').textContent = UPI_ID;
-  document.getElementById('paymentUtrInput').value = '';
-  const box = document.getElementById('paymentConfirmBox');
-  box.style.display = 'none';
-  document.getElementById('paymentPanel').style.display = 'block';
-  document.getElementById('submitPaymentBtn').disabled = false;
-  document.getElementById('paymentPanel').scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-document.getElementById('paymentCopyBtn').addEventListener('click', async ()=>{
-  try{
-    await navigator.clipboard.writeText(UPI_ID);
-    const b = document.getElementById('paymentCopyBtn');
-    b.textContent = 'Copied ✓';
-    setTimeout(()=>{ b.textContent = 'Copy'; }, 1800);
-  }catch(e){ alert('UPI ID: ' + UPI_ID); }
-});
-
-document.getElementById('submitPaymentBtn').addEventListener('click', async ()=>{
-  const utr = document.getElementById('paymentUtrInput').value.trim();
-  const box = document.getElementById('paymentConfirmBox');
-  if(!/^[A-Za-z0-9]{8,30}$/.test(utr)){
-    alert('Please enter a valid UPI Transaction ID / UTR number (8-30 letters or digits).');
-    return;
-  }
-  const btn = document.getElementById('submitPaymentBtn');
-  btn.disabled = true;
-  try{
-    await submitPaymentReference(currentPaymentRequestId, utr, SERVICE_FEE);
-    box.style.display = 'block';
-    box.textContent = "Payment reference submitted. We'll verify it and proceed with your booking — you'll be updated on WhatsApp. You can also check status under \"My Request\".";
-    document.getElementById('paymentUtrInput').value = '';
-  }catch(e){
-    console.error('Payment reference error:', e);
-    btn.disabled = false;
-    alert('Could not submit the payment reference. Please try again.');
-  }
-});
-
 document.getElementById('submitBtn').addEventListener('click', async ()=>{
   const btn = document.getElementById('submitBtn');
   const passengers = [...document.querySelectorAll('.passenger-block')].map(block=>({
@@ -3058,9 +3045,11 @@ document.getElementById('submitBtn').addEventListener('click', async ()=>{
 
   document.getElementById('confirmBox').style.display = 'block';
   document.getElementById('confirmBox').textContent =
-    `Request received — ID ${newRequest.id}. Please complete payment below to proceed.`;
+    `Request Received — ID ${newRequest.id}. We'll message you on WhatsApp once it's booked. You can also check your status anytime under "My Request".`;
 
-  showPaymentPanel(newRequest.id);
+  setTimeout(()=>{
+    document.getElementById('confirmBox').style.display = 'none';
+  }, 9000);
 
   // reset form right away
   document.getElementById('passengerContainer').innerHTML = '';
@@ -3259,16 +3248,145 @@ function buildStatusOptions(currentStatus){
   ).join('');
 }
 
+// ---------- USER-SIDE PAYMENT SECTION (My Request page) ----------
+// Only renders something when the admin has actually requested payment for
+// THIS specific request — otherwise the customer sees nothing extra.
+function buildUserPaymentSection(r){
+  const ps = r.paymentStatus || '';
+
+  if(ps === 'verified'){
+    return `<div class="payment-panel" style="margin-top:14px; text-align:left;">
+      <div class="pay-badge pay-verified">Payment Verified ✓</div>
+      <div class="payment-amount" style="margin-top:8px; font-size:14px;">
+        Ticket Fare: ₹${escapeHtml(String(r.ticketFare||''))} + Service Fee: ₹${escapeHtml(String(r.serviceFee||''))}
+        = <span>₹${escapeHtml(String(r.totalAmount||''))}</span>
+      </div>
+    </div>`;
+  }
+
+  if(ps === 'submitted'){
+    return `<div class="payment-panel" style="margin-top:14px; text-align:left;">
+      <div class="pay-badge pay-submitted">Payment Verification Pending</div>
+      <p class="payment-sub" style="margin-top:8px;">We've received your reference (UTR ${escapeHtml(String(r.upiTxnId||''))}) and are verifying it. You'll be updated once confirmed.</p>
+    </div>`;
+  }
+
+  if(ps === 'requested' || ps === 'rejected'){
+    const ticketFare = Number(r.ticketFare) || 0;
+    const serviceFee = Number(r.serviceFee) || 0;
+    const total = r.totalAmount || (ticketFare + serviceFee);
+    const upiUri = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent('Tatkal Desk ' + r.id)}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
+    const rejectedNote = ps === 'rejected'
+      ? `<p class="payment-sub" style="color:var(--red);">Your previous reference could not be verified. Please recheck and resubmit below.</p>`
+      : '';
+
+    return `<div class="payment-panel" data-docid="${r._docId}" style="margin-top:14px;">
+      <div class="payment-title">💳 Complete Payment</div>
+      ${rejectedNote}
+      <p class="payment-sub">Scan the QR code with any UPI app to pay. Once paid, enter your transaction reference below so we can verify it.</p>
+      <div class="payment-amount">
+        Ticket Fare: ₹${escapeHtml(String(ticketFare))}<br>
+        Service / Convenience Fee: ₹${escapeHtml(String(serviceFee))}<br>
+        Total: <span>₹${escapeHtml(String(total))}</span>
+      </div>
+      <img class="payment-qr" src="${qrUrl}" alt="UPI QR Code">
+      <div class="payment-upi-row">
+        <span class="payment-upi-label">UPI ID:</span>
+        <span class="payment-upi-id user-upi-id-text">${escapeHtml(UPI_ID)}</span>
+        <button type="button" class="payment-copy-btn user-payment-copy-btn">Copy</button>
+      </div>
+      <div class="field" style="margin-top:14px; text-align:left;">
+        <label>UPI Transaction ID / UTR Number <span style="color:var(--red);">*</span></label>
+        <input type="text" class="user-payment-utr-input" placeholder="e.g. 123456789012" maxlength="30">
+      </div>
+      <button type="button" class="submit-btn user-submit-payment-btn" data-docid="${r._docId}">I've Paid — Submit Reference</button>
+      <div class="confirm-box user-payment-confirm-box"></div>
+    </div>`;
+  }
+
+  return ''; // no payment requested yet — show nothing
+}
+
+function wireUserPaymentSections(){
+  document.querySelectorAll('.user-payment-copy-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(UPI_ID);
+        btn.textContent = 'Copied ✓';
+        setTimeout(()=>{ btn.textContent = 'Copy'; }, 1800);
+      }catch(e){ alert('UPI ID: ' + UPI_ID); }
+    });
+  });
+
+  document.querySelectorAll('.user-submit-payment-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const panel = btn.closest('.payment-panel');
+      const utrInput = panel.querySelector('.user-payment-utr-input');
+      const confirmBox = panel.querySelector('.user-payment-confirm-box');
+      const utr = utrInput.value.trim();
+
+      if(!/^[A-Za-z0-9]{8,30}$/.test(utr)){
+        alert('Please enter a valid UPI Transaction ID / UTR number (8-30 letters or digits).');
+        return;
+      }
+
+      btn.disabled = true;
+      try{
+        await submitPaymentReference(btn.dataset.docid, utr);
+        confirmBox.style.display = 'block';
+        confirmBox.textContent = "Payment reference submitted. We'll verify it shortly.";
+        setTimeout(()=>{
+          const mobile = document.getElementById('myMobileInput').value.trim();
+          if(mobile) document.getElementById('myRequestBtn').click();
+        }, 1500);
+      }catch(e){
+        console.error('Payment reference error:', e);
+        btn.disabled = false;
+        alert('Could not submit the payment reference. Please try again.');
+      }
+    });
+  });
+}
+
 function buildPaymentBadge(r){
   const ps = r.paymentStatus || '';
+
   if(ps === 'verified'){
-    return `<div class="pay-badge pay-verified">Payment Verified${r.upiTxnId ? ' · '+escapeHtml(String(r.upiTxnId)) : ''}</div>`;
+    return `<div class="pay-badge pay-verified">Payment Verified — ₹${escapeHtml(String(r.totalAmount||''))} (Fare ₹${escapeHtml(String(r.ticketFare||''))} + Fee ₹${escapeHtml(String(r.serviceFee||''))}) · UTR ${escapeHtml(String(r.upiTxnId || ''))}</div>`;
   }
+
   if(ps === 'submitted'){
-    return `<div class="pay-badge pay-submitted">Payment Submitted · UTR ${escapeHtml(String(r.upiTxnId || ''))}</div>
-      <button type="button" class="verify-payment-btn" data-docid="${r._docId}">Verify Payment</button>`;
+    return `<div class="pay-badge pay-submitted">Payment Submitted · UTR ${escapeHtml(String(r.upiTxnId || ''))} · Total ₹${escapeHtml(String(r.totalAmount||''))}</div>
+      <div class="pay-admin-actions">
+        <button type="button" class="verify-payment-btn" data-docid="${r._docId}">Verify Payment</button>
+        <button type="button" class="reject-payment-btn" data-docid="${r._docId}">Reject Payment</button>
+      </div>`;
   }
-  return `<div class="pay-badge pay-unpaid">Payment Pending</div>`;
+
+  if(ps === 'rejected'){
+    return `<div class="pay-badge pay-rejected">Payment Rejected — awaiting customer to resubmit (Fare ₹${escapeHtml(String(r.ticketFare||''))} + Fee ₹${escapeHtml(String(r.serviceFee||''))})</div>`;
+  }
+
+  if(ps === 'requested'){
+    return `<div class="pay-badge pay-requested">Payment Requested — Fare ₹${escapeHtml(String(r.ticketFare||''))} + Fee ₹${escapeHtml(String(r.serviceFee||''))} = ₹${escapeHtml(String(r.totalAmount||''))} (awaiting customer)</div>`;
+  }
+
+  // No payment request has been made for this request yet
+  return `
+    <button type="button" class="request-payment-btn" data-docid="${r._docId}">Request Payment</button>
+    <div class="pay-fare-form" id="payForm_${r._docId}" style="display:none;">
+      <div class="pay-fare-row">
+        <label>Ticket Fare (₹)</label>
+        <input type="number" class="pay-fare-input" min="0" placeholder="e.g. 850">
+      </div>
+      <div class="pay-fare-row">
+        <label>Service / Convenience Fee (₹)</label>
+        <input type="number" class="pay-fee-input" min="0" placeholder="e.g. 150">
+      </div>
+      <div class="pay-fare-total">Total: ₹<span class="pay-total-display">0</span></div>
+      <button type="button" class="send-payment-request-btn" data-docid="${r._docId}">Send Payment Request</button>
+    </div>`;
 }
 
 function buildRequestCardHTML(r){
@@ -3490,6 +3608,15 @@ document.getElementById('historySearchBox').addEventListener('input', ()=> rende
 document.getElementById('historyFilterSelect').addEventListener('change', ()=> renderHistoryView(ALL_REQUESTS_CACHE));
 
 // ---------- EVENT DELEGATION (works across every section, no re-attaching needed) ----------
+document.getElementById('dashContent').addEventListener('input', (e)=>{
+  if(e.target.classList.contains('pay-ticket-fare') || e.target.classList.contains('pay-service-fee')){
+    const form = e.target.closest('.request-payment-form');
+    const fare = parseFloat(form.querySelector('.pay-ticket-fare').value) || 0;
+    const fee = parseFloat(form.querySelector('.pay-service-fee').value) || 0;
+    form.querySelector('.pay-total-value').textContent = (fare + fee);
+  }
+});
+
 document.getElementById('dashContent').addEventListener('change', async (e)=>{
   if(e.target.classList.contains('status-select')){
     const docId = e.target.dataset.docid;
@@ -3538,6 +3665,55 @@ document.getElementById('dashContent').addEventListener('click', async (e)=>{
       console.error("Verify payment error:", err);
       alert("Could not verify payment. Please try again.");
       verifyBtn.disabled = false;
+    }
+    return;
+  }
+
+  const rejectBtn = e.target.closest('.reject-payment-btn');
+  if(rejectBtn){
+    const confirmed = confirm("Reject this payment reference? The customer will be able to submit a new one.");
+    if(!confirmed) return;
+    rejectBtn.disabled = true;
+    try{
+      await rejectPaymentRow(rejectBtn.dataset.docid);
+      await refreshDashboard();
+    }catch(err){
+      console.error("Reject payment error:", err);
+      alert("Could not reject payment. Please try again.");
+      rejectBtn.disabled = false;
+    }
+    return;
+  }
+
+  const requestPayBtn = e.target.closest('.request-payment-btn');
+  if(requestPayBtn){
+    const form = document.getElementById('payForm-' + requestPayBtn.dataset.docid);
+    if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    return;
+  }
+
+  const sendPayReqBtn = e.target.closest('.send-payment-request-btn');
+  if(sendPayReqBtn){
+    const docId = sendPayReqBtn.dataset.docid;
+    const form = document.getElementById('payForm-' + docId);
+    const fareInput = form.querySelector('.pay-ticket-fare');
+    const feeInput = form.querySelector('.pay-service-fee');
+    const ticketFare = parseFloat(fareInput.value);
+    const serviceFee = parseFloat(feeInput.value);
+
+    if(isNaN(ticketFare) || ticketFare < 0 || isNaN(serviceFee) || serviceFee < 0){
+      alert("Please enter a valid Ticket Fare and Service/Convenience Fee (0 or more).");
+      return;
+    }
+
+    sendPayReqBtn.disabled = true;
+    try{
+      await requestPaymentForRow(docId, ticketFare, serviceFee);
+      await refreshDashboard();
+    }catch(err){
+      console.error("Request payment error:", err);
+      alert("Could not send the payment request. Please try again.");
+      sendPayReqBtn.disabled = false;
     }
     return;
   }
