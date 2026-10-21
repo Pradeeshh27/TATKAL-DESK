@@ -2602,7 +2602,7 @@ async function rejectPaymentRow(docId){
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({
         action: "rejectPayment",
-        rowIndex: docId,
+        rowIndex: Number(docId),
         adminPassword: ADMIN_PASSCODE
       })
     });
