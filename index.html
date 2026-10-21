@@ -2596,15 +2596,30 @@ async function verifyPaymentRow(docId){
 }
 
 async function rejectPaymentRow(docId){
-  await fetch(GAS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({
-      action: "rejectPayment",
-      rowIndex: docId,
-      adminPassword: ADMIN_PASSCODE
-    })
-  });
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "rejectPayment",
+        rowIndex: docId,
+        adminPassword: ADMIN_PASSCODE
+      })
+    });
+
+    const result = await res.text();
+    console.log("Reject payment response:", res.status, result);
+
+    if (!res.ok) {
+      alert("Payment rejection failed: " + result);
+      return;
+    }
+
+    alert("Server response: " + result);
+  } catch (err) {
+    console.error("Reject payment error:", err);
+    alert("Could not connect to the server.");
+  }
 }
 
 // Admin sets the fare + fee for THIS specific request — nothing is hard-coded.
