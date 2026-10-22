@@ -2625,8 +2625,8 @@ async function rejectPaymentRow(docId){
 // Admin sets the fare + fee for THIS specific request — nothing is hard-coded.
 
 async function requestPaymentForRow(docId, ticketFare, serviceFee){
-  const waWindow = window.open("about:blank", "_blank");
-  const totalAmount = ticketFare + serviceFee;
+const waWindow = null;
+const totalAmount = ticketFare + serviceFee;
 
   try {
     const res = await fetch(GAS_URL, {
@@ -2676,13 +2676,11 @@ const message =
   "Please scan the QR code and pay ₹" + totalAmount +
   ". After payment, send your UTR/reference number here.";
 
- if (waWindow) {
-  waWindow.location.href =
-    "https://wa.me/91" + phone.replace(/^91/, "") +
-    "?text=" + encodeURIComponent(message);
-} else {
-  alert("Allow pop-ups for Tatkal Desk and try again.");
-}
+  window.open(qrCodeUrl, "_blank");
+
+window.location.href =
+  "https://wa.me/91" + phone.replace(/^91/, "") +
+  "?text=" + encodeURIComponent(message);
 
   } catch (err) {
     console.error("Request payment error:", err);
