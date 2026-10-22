@@ -2606,9 +2606,17 @@ async function rejectPaymentRow(docId){
         adminPassword: ADMIN_PASSCODE
       })
     });
+const responseText = await res.text();
+console.log("Reject payment response:", res.status, responseText);
 
-    const result = await res.json();
-    console.log("Reject payment response:", res.status, result);
+let result;
+try {
+  result = JSON.parse(responseText);
+} catch {
+  console.error("Invalid JSON response:", responseText);
+  alert("The server returned an unexpected response. Check the console.");
+  return;
+}
 
     if (!res.ok || result.success !== true) {
       alert("Payment rejection failed. Please try again.");
