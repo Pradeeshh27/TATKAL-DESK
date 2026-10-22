@@ -2675,11 +2675,13 @@ const message =
   "Please scan the QR code and pay ₹" + totalAmount +
   ". After payment, send your UTR/reference number here.";
 
-  window.open(qrCodeUrl, "_blank");
+const qrWindow = window.open(qrCodeUrl, "_blank");
 
-window.location.href =
+window.open(
   "https://wa.me/91" + phone.replace(/^91/, "") +
-  "?text=" + encodeURIComponent(message);
+  "?text=" + encodeURIComponent(message),
+  "_blank"
+);
 
   } catch (err) {
     console.error("Request payment error:", err);
