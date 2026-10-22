@@ -2664,13 +2664,17 @@ async function requestPaymentForRow(docId, ticketFare, serviceFee){
       "https://pradeeshh27.github.io/TATKAL-DESK/?pay=" +
       encodeURIComponent(result.paymentToken);
 
-    const message =
-      "Tatkal Desk - Payment Request\n\n" +
-      "Ticket fare: ₹" + ticketFare + "\n" +
-      "Service fee: ₹" + serviceFee + "\n" +
-      "Total payable: ₹" + totalAmount + "\n\n" +
-      "Please open this link to view your payment details and submit payment:\n" +
-      paymentLink;
+   const qrCodeUrl =
+  "https://pradeeshh27.github.io/TATKAL-DESK/tatkal-desk-qr-clear.png";
+
+const message =
+  "Tatkal Desk - Payment Request\n\n" +
+  "Ticket fare: ₹" + ticketFare + "\n" +
+  "Service fee: ₹" + serviceFee + "\n" +
+  "Total payable: ₹" + totalAmount + "\n\n" +
+  "Admin UPI QR code: " + qrCodeUrl + "\n\n" +
+  "Please scan the QR code and pay ₹" + totalAmount +
+  ". After payment, send your UTR/reference number here.";
 
  if (waWindow) {
   waWindow.location.href =
