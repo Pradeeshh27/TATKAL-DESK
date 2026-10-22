@@ -873,11 +873,16 @@
     background:var(--amber); color:#1a1200; border:none; border-radius:4px;
     font-family:'Space Mono',monospace; font-size:11px; font-weight:700; text-transform:uppercase;
   }
-  .payment-panel{
-    margin-top:22px; padding:22px;
-    background:#FFF8E8; border:1px solid #B89B63;
-    border-radius:10px; text-align:center;
-  }
+ .payment-panel{
+    margin-top:22px;
+    padding:22px;
+    width:100%;
+    box-sizing:border-box;
+    background:#FFF8E8;
+    border:1px solid #B89B63;
+    border-radius:10px;
+    text-align:center;
+}
   .payment-title{
     font-family:'Space Mono',monospace; font-weight:700; font-size:16px;
     color:#8B0000; margin-bottom:8px;
@@ -1087,6 +1092,19 @@ textarea:focus{
     overflow:visible;
   }
   @media (max-width:800px){.row{grid-template-columns:1fr; }}
+@media (max-width:800px) {
+  .row .notes-id-column .rejected-payment-panel {
+    width: calc(100% + 64px);
+    max-width: none;
+    box-sizing: border-box;
+    margin-left: -32px;
+    margin-right: -32px;
+  }
+
+  .row .notes-id-column {
+    min-width: 0;
+  }
+}
   .row .cell-label{display:none; font-size:10px; color:var(--muted); text-transform:uppercase; font-family:'Space Mono',monospace;}
   @media (max-width:800px){.row .cell-label{display:block;}}
   .status-pill{
@@ -1146,6 +1164,25 @@ textarea:focus{
   }
   .note-text{font-size:11px; color:var(--muted); margin-top:4px; font-style:italic;}
   .footer-note{margin-top:30px; font-size:11px; color:var(--muted); line-height:1.6; text-align:center;}
+  
+.mobile-title-nowrap {
+  white-space: nowrap;
+  display: inline;
+}
+
+.mobile-nazar {
+  white-space: nowrap;
+  display: inline;
+  margin-left: 2px;
+}
+
+@media (max-width: 480px) {
+  .mobile-title-nowrap,
+  .mobile-nazar {
+    font-size: 0.9em;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1194,8 +1231,7 @@ textarea:focus{
             <path d="M2 22L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path d="M36 18L42 22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <span data-i18n="title">Tatkal Desk</span> <span style="font-size:0.55em; vertical-align:middle;">🧿</span>
-        </p>
+          <span class="mobile-title-nowrap" data-i18n="title">Tatkal Desk</span><span class="mobile-nazar"> 🧿</span>        </p>
         <div class="flap-row">
           <div>
             <span class="flap-label">
@@ -2684,7 +2720,7 @@ const message =
   "🛠️ Service Fee: ₹" + serviceFee + "\n" +
   "💰 *Total Payable: ₹" + totalAmount + "*\n\n" +
   "━━━━━━━━━━━━━━\n\n" +
-  "📲 Please scan the attached QR code and pay ₹" + totalAmount + ".\n\n" +
+  "📲 Please scan the attached QR code and PAY ₹" + totalAmount + ".\n\n" +
   "After payment, please send your payment screenshot here for verification.\n\n" +
   "Thank you for choosing *Tatkal Desk*! 🙏";
 
@@ -3469,15 +3505,35 @@ function buildPaymentBadge(r){
   }
 
 
-if(ps === 'rejected'){
-  return `
-    <div class="payment-panel" style="margin-top:14px; text-align:left; border:1px solid rgba(239,68,68,0.35);">
-      <div class="pay-badge pay-rejected"
-           style="background:rgba(239,68,68,0.12); color:#DC5555; border:1px solid rgba(239,68,68,0.35); padding:8px 12px; border-radius:6px; display:inline-block; font-weight:600;">
-        Payment Rejected
-      </div>
-    </div>`;
-}
+
+  if(ps === 'rejected'){
+    return `
+        <div class="payment-panel rejected-payment-panel" style="
+        margin-top:14px;
+        text-align:left;
+        width:100%;
+        max-width:none;
+        box-sizing:border-box;
+        display:block;
+        padding:14px;
+        border:1px solid rgba(239,68,68,0.35);
+        border-radius:10px;
+      ">
+        <div class="pay-badge pay-rejected"
+             style="
+               background:rgba(239,68,68,0.12);
+               color:#DC5555;
+               border:1px solid rgba(239,68,68,0.35);
+               padding:8px 12px;
+               border-radius:6px;
+               display:inline-block;
+               font-weight:600;
+             ">
+          Payment Rejected
+        </div>
+      </div>`;
+  }
+
 
 
   // No payment request has been made for this request yet
@@ -3522,12 +3578,12 @@ function buildRequestCardHTML(r){
       ${escapeHtml(r.mobile)}
       <div class="note-text">ID: ${escapeHtml(r.idLast4 || '—')}</div>
     </div>
-    <div>
-      <span class="cell-label">Notes / ID</span>
-      <span class="note-text">${escapeHtml(r.id)}</span>
-      <div class="note-text">${escapeHtml(r.notes || '')} ${escapeHtml(r.train)}</div>
-      ${buildPaymentBadge(r)}
-    </div>
+  <div class="notes-id-column">
+  <span class="cell-label">Notes / ID</span>
+  <span class="note-text">${escapeHtml(r.id)}</span>
+  <div class="note-text">${escapeHtml(r.notes || '')} ${escapeHtml(r.train)}</div>
+  ${buildPaymentBadge(r)}
+</div>
     <div>
       <select class="status-select" data-docid="${r._docId}">
         ${buildStatusOptions(r.status)}
