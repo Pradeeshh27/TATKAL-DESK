@@ -2607,18 +2607,18 @@ async function rejectPaymentRow(docId){
       })
     });
 
-    const result = await res.text();
+    const result = await res.json();
     console.log("Reject payment response:", res.status, result);
 
-    if (!res.ok) {
-      alert("Payment rejection failed: " + result);
+    if (!res.ok || result.success !== true) {
+      alert("Payment rejection failed. Please try again.");
       return;
     }
 
-    alert("Server response: " + result);
+    await loadRequests();
   } catch (err) {
     console.error("Reject payment error:", err);
-    alert("Could not connect to the server.");
+    alert("Could not connect to the server. Please try again.");
   }
 }
 
