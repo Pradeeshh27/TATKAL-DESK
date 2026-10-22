@@ -3710,6 +3710,20 @@ document.getElementById('dashContent').addEventListener('click', async (e)=>{
     return;
   }
 
+  const rejectBtn = e.target.closest('.reject-payment-btn');
+if (rejectBtn) {
+  rejectBtn.disabled = true;
+  try {
+    await rejectPaymentRow(rejectBtn.dataset.docid);
+    await refreshDashboard();
+  } catch (err) {
+    console.error("Reject payment error:", err);
+    alert("Could not reject payment. Please try again.");
+    rejectBtn.disabled = false;
+  }
+  return;
+}
+
   
   const requestPayBtn = e.target.closest('.request-payment-btn');
   if(requestPayBtn){
