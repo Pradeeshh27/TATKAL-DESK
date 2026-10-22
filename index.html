@@ -3462,16 +3462,9 @@ function buildPaymentBadge(r){
       </div>`;
   }
 
-  if(ps === 'rejected'){
-    return `<div class="payment-panel" style="margin-top:14px; text-align:left;">
-      <div class="pay-badge pay-rejected">Payment Rejected</div>
-      <div class="payment-amount" style="margin-top:8px; font-size:14px;">
-        Ticket Fare: ₹${escapeHtml(String(r.ticketFare||''))} + Service Fee: ₹${escapeHtml(String(r.serviceFee||''))}
-        = <span>₹${escapeHtml(String(r.totalAmount||''))}</span>
-      </div>
-      <p class="payment-sub" style="margin-top:8px;">Your payment was rejected. Please check your payment details and resubmit your payment.</p>
-    </div>`;
-  }
+if(ps === 'rejected'){
+  return `<div class="pay-badge pay-rejected">Payment Rejected</div>`;
+}
 
   if(ps === 'requested'){
     return `<div class="pay-badge pay-requested">Payment Requested — Fare ₹${escapeHtml(String(r.ticketFare||''))} + Fee ₹${escapeHtml(String(r.serviceFee||''))} = ₹${escapeHtml(String(r.totalAmount||''))} (awaiting customer)</div>`;
