@@ -2625,6 +2625,7 @@ async function rejectPaymentRow(docId){
 // Admin sets the fare + fee for THIS specific request — nothing is hard-coded.
 
 async function requestPaymentForRow(docId, ticketFare, serviceFee){
+  const waWindow = window.open("about:blank", "_blank");
   const totalAmount = ticketFare + serviceFee;
 
   try {
@@ -2671,11 +2672,13 @@ async function requestPaymentForRow(docId, ticketFare, serviceFee){
       "Please open this link to view your payment details and submit payment:\n" +
       paymentLink;
 
-    window.open(
-      "https://wa.me/91" + phone.replace(/^91/, "") +
-      "?text=" + encodeURIComponent(message),
-      "_blank"
-    );
+ if (waWindow) {
+  waWindow.location.href =
+    "https://wa.me/91" + phone.replace(/^91/, "") +
+    "?text=" + encodeURIComponent(message);
+} else {
+  alert("Allow pop-ups for Tatkal Desk and try again.");
+}
 
   } catch (err) {
     console.error("Request payment error:", err);
