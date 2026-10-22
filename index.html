@@ -2623,21 +2623,66 @@ async function rejectPaymentRow(docId){
 }
 
 // Admin sets the fare + fee for THIS specific request — nothing is hard-coded.
+
 async function requestPaymentForRow(docId, ticketFare, serviceFee){
   const totalAmount = ticketFare + serviceFee;
-  await fetch(GAS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({
-      action: "requestPayment",
-      rowIndex: docId,
-      ticketFare,
-      serviceFee,
-      totalAmount,
-      adminPassword: ADMIN_PASSCODE
-    })
-  });
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "requestPayment",
+        rowIndex: Number(docId),
+        ticketFare,
+        serviceFee,
+        totalAmount,
+        adminPassword: ADMIN_PASSCODE
+      })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || result.success !== true || !result.paymentToken) {
+      throw new Error(result.error || "Payment request failed");
+    }
+
+    // Find the selected request and its mobile number
+    const requests = await loadRequests();
+    const request = requests.find(
+      r => Number(r._rowIndex) === Number(docId)
+    );
+
+    if (!request || !request.mobile) {
+      alert("Payment request saved, but customer mobile number was not found.");
+      return;
+    }
+
+    const phone = String(request.mobile).replace(/\D/g, "");
+    const paymentLink =
+      "https://pradeeshh27.github.io/TATKAL-DESK/?pay=" +
+      encodeURIComponent(result.paymentToken);
+
+    const message =
+      "Tatkal Desk - Payment Request\n\n" +
+      "Ticket fare: ₹" + ticketFare + "\n" +
+      "Service fee: ₹" + serviceFee + "\n" +
+      "Total payable: ₹" + totalAmount + "\n\n" +
+      "Please open this link to view your payment details and submit payment:\n" +
+      paymentLink;
+
+    window.open(
+      "https://wa.me/91" + phone.replace(/^91/, "") +
+      "?text=" + encodeURIComponent(message),
+      "_blank"
+    );
+
+  } catch (err) {
+    console.error("Request payment error:", err);
+    alert("Could not create payment request. Please try again.");
+  }
 }
+
 
 function escapeHtml(str){
   const div = document.createElement('div');
