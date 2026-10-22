@@ -3463,7 +3463,12 @@ function buildPaymentBadge(r){
   }
 
 if(ps === 'rejected'){
-  return `<div class="pay-badge pay-rejected">Payment Rejected</div>`;
+  return `
+    <div class="payment-panel" style="margin-top:14px; text-align:left;">
+      <div class="pay-badge pay-rejected">
+        Payment Rejected
+      </div>
+    </div>`;
 }
 
   if(ps === 'requested'){
