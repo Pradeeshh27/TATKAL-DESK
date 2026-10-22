@@ -883,6 +883,12 @@
     border-radius:10px;
     text-align:center;
 }
+
+
+.payment-panel:has(.pay-rejected) {
+    padding: 8px;
+}
+
   .payment-title{
     font-family:'Space Mono',monospace; font-weight:700; font-size:16px;
     color:#8B0000; margin-bottom:8px;
@@ -1101,10 +1107,13 @@ textarea:focus{
     margin-right: -32px;
   }
 
+
+@media (max-width:800px) {
   .row .notes-id-column {
     min-width: 0;
   }
 }
+
   .row .cell-label{display:none; font-size:10px; color:var(--muted); text-transform:uppercase; font-family:'Space Mono',monospace;}
   @media (max-width:800px){.row .cell-label{display:block;}}
   .status-pill{
@@ -3506,33 +3515,14 @@ function buildPaymentBadge(r){
 
 
 
+
+
+
   if(ps === 'rejected'){
-    return `
-        <div class="payment-panel rejected-payment-panel" style="
-        margin-top:14px;
-        text-align:left;
-        width:100%;
-        max-width:none;
-        box-sizing:border-box;
-        display:block;
-        padding:14px;
-        border:1px solid rgba(239,68,68,0.35);
-        border-radius:10px;
-      ">
-        <div class="pay-badge pay-rejected"
-             style="
-               background:rgba(239,68,68,0.12);
-               color:#DC5555;
-               border:1px solid rgba(239,68,68,0.35);
-               padding:8px 12px;
-               border-radius:6px;
-               display:inline-block;
-               font-weight:600;
-             ">
-          Payment Rejected
-        </div>
-      </div>`;
+    return `<div class="pay-badge pay-rejected" style="background:rgba(239,68,68,0.12); color:#DC5555; border:1px solid rgba(239,68,68,0.35); padding:8px 12px; border-radius:6px; display:inline-block; font-weight:600;">Payment Rejected</div>`;
   }
+
+
 
 
 
