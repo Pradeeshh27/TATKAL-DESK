@@ -2677,11 +2677,9 @@ const message =
 
 
 
-window.open(
+window.location.href =
   "https://wa.me/91" + phone.replace(/^91/, "") +
-  "?text=" + encodeURIComponent(message),
-  "_blank"
-);
+  "?text=" + encodeURIComponent(message);
 
   } catch (err) {
     console.error("Request payment error:", err);
