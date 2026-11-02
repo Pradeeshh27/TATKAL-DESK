@@ -2679,8 +2679,7 @@ try {
 
 async function requestPaymentForRow(docId, ticketFare, serviceFee){
 const waWindow = null;
-const totalAmount = ticketFare + serviceFee;
-
+const totalAmount = Number(ticketFare) + Number(serviceFee);
   try {
     const res = await fetch(GAS_URL, {
       method: "POST",
@@ -2711,17 +2710,17 @@ const totalAmount = ticketFare + serviceFee;
       alert("Payment request saved, but customer mobile number was not found.");
       return;
     }
+const phone = String(request.mobile).replace(/\D/g, "");
 
-    const phone = String(request.mobile).replace(/\D/g, "");
-    const paymentLink =
-      "https://pradeeshh27.github.io/TATKAL-DESK/?pay=" +
-      encodeURIComponent(result.paymentToken);
+const paymentLink =
+  "https://pradeeshh27.github.io/TATKAL-DESK/?pay=" +
+  encodeURIComponent(result.paymentToken);
 
-   const qrCodeUrl =
+
+const qrCodeUrl =
   "https://pradeeshh27.github.io/TATKAL-DESK/tatkal-desk-qr-clear.png";
 
 
-```javascript
 const message =
   "*🚆 TATKAL DESK*\n\n" +
   "*PAYMENT REQUEST*\n" +
@@ -2731,9 +2730,6 @@ const message =
   "📲 Please scan the attached QR code and pay ₹" + totalAmount + ".\n\n" +
   "After payment, please send your payment screenshot here for verification.\n\n" +
   "Thank you for choosing *Tatkal Desk*! 🙏";
-```
-
-
 
 
 window.location.href =
